@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <style>
+    body {
+      width: 320px;
+      padding: 15px;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      color: #333;
+    }
+    h2 {
+      margin-top: 0;
+      color: #0a66c2; /* LinkedIn-ish blue */
+      font-size: 18px;
+    }
+    .field-group {
+      margin-bottom: 10px;
+    }
+    label {
+      display: block;
+      font-size: 12px;
+      font-weight: bold;
+      margin-bottom: 4px;
+      color: #666;
+    }
+    input, textarea {
+      width: 100%;
+      padding: 8px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      box-sizing: border-box;
+      font-size: 13px;
+    }
+    textarea {
+      height: 80px;
+      resize: vertical;
+    }
+    button {
+      width: 100%;
+      background-color: #0a66c2;
+      color: white;
+      border: none;
+      padding: 10px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-weight: bold;
+      font-size: 14px;
+    }
+    button:hover {
+      background-color: #004182;
+    }
+    .status {
+      margin-top: 10px;
+      font-size: 12px;
+      text-align: center;
+      color: #888;
+    }
+    .hidden {
+      display: none;
+    }
+  </style>
+</head>
+<body>
+  <h2>JobAutomate</h2>
+  
+  <div id="loading" class="status">Detecting job details...</div>
+
+  <div id="job-form" class="hidden">
+    <div class="field-group">
+      <label for="title">Job Title</label>
+      <input type="text" id="title">
+    </div>
+    
+    <div class="field-group">
+      <label for="company">Company</label>
+      <input type="text" id="company">
+    </div>
+    
+    <div class="field-group">
+      <label for="location">Location</label>
+      <input type="text" id="location">
+    </div>
+
+    <div class="field-group">
+      <label for="description">Job Description</label>
+      <textarea id="description" rows="6"></textarea>
+    </div>
+
+    <button id="save-btn">Save Job</button>
+  </div>
+
+  <div id="status-msg" class="status"></div>
+
+  <script src="popup.js"></script>
+</body>
+</html>

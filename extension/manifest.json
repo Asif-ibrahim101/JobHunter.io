@@ -1,0 +1,28 @@
+{
+  "manifest_version": 3,
+  "name": "JobAutomate",
+  "version": "1.0",
+  "description": "Automatically scrape job listings and track applications.",
+  "permissions": [
+    "activeTab",
+    "scripting",
+    "storage"
+  ],
+  "host_permissions": [
+    "*://*.linkedin.com/*"
+  ],
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "JobAutomate"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "*://*.linkedin.com/*"
+      ],
+      "js": [
+        "content.js"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,18 @@
+{
+    "name": "jobautomate-scraper",
+    "version": "1.0.0",
+    "description": "LinkedIn job scraper for JobAutomate",
+    "main": "index.js",
+    "scripts": {
+        "start": "node index.js",
+        "scrape": "node index.js --run-now"
+    },
+    "dependencies": {
+        "@supabase/supabase-js": "^2.39.3",
+        "dotenv": "^16.4.1",
+        "node-cron": "^3.0.3",
+        "puppeteer": "^22.0.0",
+        "puppeteer-extra": "^3.3.6",
+        "puppeteer-extra-plugin-stealth": "^2.11.2"
+    }
+}
