@@ -97,16 +97,57 @@ async function scrapeGlassdoorJobs(options = {}) {
             if (job.url) {
                 try {
                     console.log(`  [${i + 1}/${jobData.length}] Fetching: ${job.title}`);
-                    await page.goto(job.url, { waitUntil: 'networkidle2', timeout: 20000 });
+                    await page.goto(job.url, { waitUntil: 'domcontentloaded', timeout: 25000 });
 
-                    await page.waitForSelector('[data-test="jobDescriptionContent"], .JobDetails_jobDescription__6RMtx', { timeout: 5000 }).catch(() => { });
+                    // Wait for page to stabilize
+                    await new Promise(r => setTimeout(r, 2000));
 
+                    // Try to click "Show More" button if it exists
+                    await page.evaluate(() => {
+                        const showMoreBtn = document.querySelector('button[data-test="showMore"], .css-t3xrds, [class*="ShowMore"]');
+                        if (showMoreBtn) showMoreBtn.click();
+                    });
+
+                    await new Promise(r => setTimeout(r, 1000));
+
+                    // Extract description with multiple selector attempts
                     const description = await page.evaluate(() => {
-                        const descEl = document.querySelector('[data-test="jobDescriptionContent"], .JobDetails_jobDescription__6RMtx, .desc');
-                        return descEl?.textContent?.trim() || '';
+                        // Try multiple selectors in order of likelihood
+                        const selectors = [
+                            '.JobDetails_jobDescription__6RMtx',
+                            '[data-test="jobDescriptionContent"]',
+                            '.jobDescriptionContent',
+                            '.description',
+                            '.desc',
+                            '[class*="jobDescription"]',
+                            '[class*="JobDescription"]',
+                            '.css-1glx05o', // Common Glassdoor class
+                            'div[data-brandviews="MODULE:n=jobDetails:oc=joDescription"]',
+                            '#JobDescriptionContainer',
+                            'section[data-test="jobDescription"]',
+                        ];
+
+                        for (const selector of selectors) {
+                            const el = document.querySelector(selector);
+                            if (el && el.textContent?.trim().length > 50) {
+                                return el.textContent.trim();
+                            }
+                        }
+
+                        // Fallback: find the longest text block on the page
+                        const allDivs = document.querySelectorAll('div, section, article');
+                        let longest = '';
+                        allDivs.forEach(div => {
+                            const text = div.textContent?.trim() || '';
+                            if (text.length > longest.length && text.length > 200 && text.length < 10000) {
+                                longest = text;
+                            }
+                        });
+                        return longest;
                     });
 
                     job.description = description;
+                    console.log(`    ✓ Description: ${description.length} chars`);
                     await new Promise(r => setTimeout(r, CONFIG.delayBetweenPages));
 
                 } catch (err) {

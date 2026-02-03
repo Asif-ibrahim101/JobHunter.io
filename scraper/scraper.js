@@ -105,22 +105,45 @@ async function scrapeLinkedInJobs(options = {}) {
             try {
                 console.log(`  [${i + 1}/${jobs.length}] Fetching description for: ${job.title}`);
 
-                await page.goto(job.url, { waitUntil: 'networkidle2', timeout: 20000 });
+                await page.goto(job.url, { waitUntil: 'domcontentloaded', timeout: 25000 });
+
+                // Wait for page to stabilize
+                await new Promise(r => setTimeout(r, 2000));
 
                 // Wait for description to load
-                await page.waitForSelector('.description__text, .show-more-less-html__markup', { timeout: 5000 }).catch(() => {});
+                await page.waitForSelector('.description__text, .show-more-less-html__markup, .jobs-description', { timeout: 8000 }).catch(() => { });
 
-                // Extract description
+                // Try to click "Show more" button if it exists
+                await page.evaluate(() => {
+                    const showMoreBtn = document.querySelector('.show-more-less-html__button, button[aria-label*="Show more"]');
+                    if (showMoreBtn) showMoreBtn.click();
+                });
+
+                await new Promise(r => setTimeout(r, 1000));
+
+                // Extract description with multiple selector attempts
                 const description = await page.evaluate(() => {
-                    // Try multiple selectors for the description
-                    const descEl = document.querySelector('.description__text .show-more-less-html__markup') ||
-                                   document.querySelector('.show-more-less-html__markup') ||
-                                   document.querySelector('.description__text') ||
-                                   document.querySelector('[class*="description"]');
-                    return descEl?.textContent?.trim() || '';
+                    const selectors = [
+                        '.description__text .show-more-less-html__markup',
+                        '.show-more-less-html__markup',
+                        '.description__text',
+                        '.jobs-description__content',
+                        '.jobs-description',
+                        '[class*="description"]',
+                        '.job-view-layout',
+                    ];
+
+                    for (const selector of selectors) {
+                        const el = document.querySelector(selector);
+                        if (el && el.textContent?.trim().length > 100) {
+                            return el.textContent.trim();
+                        }
+                    }
+                    return '';
                 });
 
                 job.description = description;
+                console.log(`    ✓ Description: ${description.length} chars`);
 
                 // Add a small delay to avoid rate limiting
                 await new Promise(r => setTimeout(r, CONFIG.delayBetweenPages));
