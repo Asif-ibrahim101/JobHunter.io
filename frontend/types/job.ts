@@ -6,5 +6,6 @@ export interface Job {
     description: string;
     url: string;
     source: string;
+    logo?: string;
     created_at: string;
 }

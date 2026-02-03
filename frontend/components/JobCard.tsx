@@ -15,6 +15,7 @@ export default function JobCard({ job, onDelete }: JobCardProps) {
     const [expanded, setExpanded] = useState(false);
     const [showAnswerModal, setShowAnswerModal] = useState(false);
     const [isBookmarked, setIsBookmarked] = useState(false);
+    const [imageError, setImageError] = useState(false);
 
     const handleDelete = async () => {
         if (!confirm('Delete this job?')) return;
@@ -78,9 +79,18 @@ export default function JobCard({ job, onDelete }: JobCardProps) {
                     {/* Header with logo and bookmark */}
                     <div className="flex items-start gap-4">
                         {/* Company Logo */}
-                        <div className={`w-12 h-12 rounded-xl ${getLogoColor(job.company)} flex items-center justify-center text-white font-bold text-sm shadow-sm`}>
-                            {getCompanyInitials(job.company)}
-                        </div>
+                        {job.logo && !imageError ? (
+                            <img
+                                src={job.logo}
+                                alt={`${job.company} logo`}
+                                className="w-12 h-12 rounded-xl object-contain bg-white border border-gray-100 dark:border-gray-700 shadow-sm p-1"
+                                onError={() => setImageError(true)}
+                            />
+                        ) : (
+                            <div className={`w-12 h-12 rounded-xl ${getLogoColor(job.company)} flex items-center justify-center text-white font-bold text-sm shadow-sm`}>
+                                {getCompanyInitials(job.company)}
+                            </div>
+                        )}
 
                         <div className="flex-1 min-w-0">
                             <div className="flex items-start justify-between gap-2">

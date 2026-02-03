@@ -78,12 +78,14 @@ async function scrapeLinkedInJobs(options = {}) {
                     const companyEl = card.querySelector('.base-search-card__subtitle, h4');
                     const locationEl = card.querySelector('.job-search-card__location, .job-card-container__metadata-item');
                     const linkEl = card.querySelector('a.base-card__full-link, a');
+                    const logoEl = card.querySelector('img.artdeco-entity-image, .job-search-card__logo-image, img.job-card-list__entity-image');
 
                     return {
                         title: titleEl?.textContent?.trim() || '',
                         company: companyEl?.textContent?.trim() || '',
                         location: locationEl?.textContent?.trim() || '',
                         url: linkEl?.href || '',
+                        logo: logoEl?.getAttribute('src') || logoEl?.getAttribute('data-delayed-url') || '',
                     };
                 }, i);
 

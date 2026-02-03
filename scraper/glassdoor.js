@@ -73,6 +73,7 @@ async function scrapeGlassdoorJobs(options = {}) {
                 const companyEl = card.querySelector('[data-test="employer-short-name"], .EmployerProfile_employerName__mSLUq, .job-search-key-l2wjgv');
                 const locationEl = card.querySelector('[data-test="emp-location"], .JobCard_location__Ds1fM, .location');
                 const linkEl = card.querySelector('a[href*="/job-listing/"], a[data-test="job-link"]');
+                const logoEl = card.querySelector('[data-test="employer-logo"] img, .JobCard_logo__2mS8Z img, img[alt*="Logo"]');
 
                 if (titleEl) {
                     results.push({
@@ -80,6 +81,7 @@ async function scrapeGlassdoorJobs(options = {}) {
                         company: companyEl?.textContent?.trim() || '',
                         location: locationEl?.textContent?.trim() || '',
                         url: linkEl?.href || '',
+                        logo: logoEl?.getAttribute('src') || '',
                     });
                 }
             });
