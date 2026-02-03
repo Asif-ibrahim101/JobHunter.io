@@ -5,6 +5,14 @@ import { supabase } from '@/lib/supabase';
 import { Job } from '@/types/job';
 import JobCard from '@/components/JobCard';
 
+// Date filter options
+const DATE_FILTERS = [
+  { label: 'All Time', value: '' },
+  { label: 'Last 24 hours', value: '24h' },
+  { label: 'Last 7 days', value: '7d' },
+  { label: 'Last 30 days', value: '30d' },
+];
+
 export default function Dashboard() {
   const [jobs, setJobs] = useState<Job[]>([]);
   const [loading, setLoading] = useState(true);
@@ -15,6 +23,7 @@ export default function Dashboard() {
   const [selectedCompany, setSelectedCompany] = useState('');
   const [selectedLocation, setSelectedLocation] = useState('');
   const [selectedSource, setSelectedSource] = useState('');
+  const [selectedDateFilter, setSelectedDateFilter] = useState('');
 
   useEffect(() => {
     fetchJobs();
@@ -58,10 +67,28 @@ export default function Dashboard() {
     return unique.sort();
   }, [jobs]);
 
+  // Get date cutoff based on filter
+  const getDateCutoff = (filter: string): Date | null => {
+    if (!filter) return null;
+    const now = new Date();
+    switch (filter) {
+      case '24h':
+        return new Date(now.getTime() - 24 * 60 * 60 * 1000);
+      case '7d':
+        return new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+      case '30d':
+        return new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+      default:
+        return null;
+    }
+  };
+
   // Filtered jobs
   const filteredJobs = useMemo(() => {
+    const dateCutoff = getDateCutoff(selectedDateFilter);
+
     return jobs.filter(job => {
-      const matchesSearch = !searchQuery || 
+      const matchesSearch = !searchQuery ||
         job.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
         job.company.toLowerCase().includes(searchQuery.toLowerCase()) ||
         job.description?.toLowerCase().includes(searchQuery.toLowerCase());
@@ -70,18 +97,21 @@ export default function Dashboard() {
       const matchesLocation = !selectedLocation || job.location === selectedLocation;
       const matchesSource = !selectedSource || job.source === selectedSource;
 
-      return matchesSearch && matchesCompany && matchesLocation && matchesSource;
+      const matchesDate = !dateCutoff || new Date(job.created_at) >= dateCutoff;
+
+      return matchesSearch && matchesCompany && matchesLocation && matchesSource && matchesDate;
     });
-  }, [jobs, searchQuery, selectedCompany, selectedLocation, selectedSource]);
+  }, [jobs, searchQuery, selectedCompany, selectedLocation, selectedSource, selectedDateFilter]);
 
   const clearFilters = () => {
     setSearchQuery('');
     setSelectedCompany('');
     setSelectedLocation('');
     setSelectedSource('');
+    setSelectedDateFilter('');
   };
 
-  const hasActiveFilters = searchQuery || selectedCompany || selectedLocation || selectedSource;
+  const hasActiveFilters = searchQuery || selectedCompany || selectedLocation || selectedSource || selectedDateFilter;
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800">
@@ -118,7 +148,7 @@ export default function Dashboard() {
       {/* Filters */}
       <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <div className="flex flex-wrap gap-4">
+          <div className="flex flex-wrap gap-3">
             {/* Search */}
             <div className="flex-1 min-w-[200px]">
               <div className="relative">
@@ -134,6 +164,17 @@ export default function Dashboard() {
                 />
               </div>
             </div>
+
+            {/* Date Filter */}
+            <select
+              value={selectedDateFilter}
+              onChange={(e) => setSelectedDateFilter(e.target.value)}
+              className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
+            >
+              {DATE_FILTERS.map(filter => (
+                <option key={filter.value} value={filter.value}>{filter.label}</option>
+              ))}
+            </select>
 
             {/* Company Filter */}
             <select
@@ -204,8 +245,8 @@ export default function Dashboard() {
               {hasActiveFilters ? 'No jobs match your filters' : 'No jobs saved yet'}
             </h2>
             <p className="text-gray-500 dark:text-gray-400 mt-2">
-              {hasActiveFilters 
-                ? 'Try adjusting your filters or search query.' 
+              {hasActiveFilters
+                ? 'Try adjusting your filters or search query.'
                 : 'Use the Chrome extension or run the scraper to add jobs.'}
             </p>
             {hasActiveFilters && (
