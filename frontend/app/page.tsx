@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { supabase } from '@/lib/supabase';
 import { Job } from '@/types/job';
 import JobCard from '@/components/JobCard';
@@ -9,6 +9,12 @@ export default function Dashboard() {
   const [jobs, setJobs] = useState<Job[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  // Filter states
+  const [searchQuery, setSearchQuery] = useState('');
+  const [selectedCompany, setSelectedCompany] = useState('');
+  const [selectedLocation, setSelectedLocation] = useState('');
+  const [selectedSource, setSelectedSource] = useState('');
 
   useEffect(() => {
     fetchJobs();
@@ -36,6 +42,47 @@ export default function Dashboard() {
     setJobs(jobs.filter((job) => job.id !== id));
   };
 
+  // Get unique values for filters
+  const companies = useMemo(() => {
+    const unique = [...new Set(jobs.map(j => j.company).filter(Boolean))];
+    return unique.sort();
+  }, [jobs]);
+
+  const locations = useMemo(() => {
+    const unique = [...new Set(jobs.map(j => j.location).filter(Boolean))];
+    return unique.sort();
+  }, [jobs]);
+
+  const sources = useMemo(() => {
+    const unique = [...new Set(jobs.map(j => j.source).filter(Boolean))];
+    return unique.sort();
+  }, [jobs]);
+
+  // Filtered jobs
+  const filteredJobs = useMemo(() => {
+    return jobs.filter(job => {
+      const matchesSearch = !searchQuery || 
+        job.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        job.company.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        job.description?.toLowerCase().includes(searchQuery.toLowerCase());
+
+      const matchesCompany = !selectedCompany || job.company === selectedCompany;
+      const matchesLocation = !selectedLocation || job.location === selectedLocation;
+      const matchesSource = !selectedSource || job.source === selectedSource;
+
+      return matchesSearch && matchesCompany && matchesLocation && matchesSource;
+    });
+  }, [jobs, searchQuery, selectedCompany, selectedLocation, selectedSource]);
+
+  const clearFilters = () => {
+    setSearchQuery('');
+    setSelectedCompany('');
+    setSelectedLocation('');
+    setSelectedSource('');
+  };
+
+  const hasActiveFilters = searchQuery || selectedCompany || selectedLocation || selectedSource;
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800">
       {/* Header */}
@@ -52,7 +99,7 @@ export default function Dashboard() {
             </div>
             <div className="flex items-center gap-4">
               <span className="bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 px-3 py-1 rounded-full text-sm font-medium">
-                {jobs.length} jobs
+                {filteredJobs.length} of {jobs.length} jobs
               </span>
               <button
                 onClick={fetchJobs}
@@ -68,6 +115,78 @@ export default function Dashboard() {
         </div>
       </header>
 
+      {/* Filters */}
+      <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+          <div className="flex flex-wrap gap-4">
+            {/* Search */}
+            <div className="flex-1 min-w-[200px]">
+              <div className="relative">
+                <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                </svg>
+                <input
+                  type="text"
+                  placeholder="Search jobs..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                />
+              </div>
+            </div>
+
+            {/* Company Filter */}
+            <select
+              value={selectedCompany}
+              onChange={(e) => setSelectedCompany(e.target.value)}
+              className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
+            >
+              <option value="">All Companies</option>
+              {companies.map(company => (
+                <option key={company} value={company}>{company}</option>
+              ))}
+            </select>
+
+            {/* Location Filter */}
+            <select
+              value={selectedLocation}
+              onChange={(e) => setSelectedLocation(e.target.value)}
+              className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
+            >
+              <option value="">All Locations</option>
+              {locations.map(location => (
+                <option key={location} value={location}>{location}</option>
+              ))}
+            </select>
+
+            {/* Source Filter */}
+            <select
+              value={selectedSource}
+              onChange={(e) => setSelectedSource(e.target.value)}
+              className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
+            >
+              <option value="">All Sources</option>
+              {sources.map(source => (
+                <option key={source} value={source}>{source}</option>
+              ))}
+            </select>
+
+            {/* Clear Filters */}
+            {hasActiveFilters && (
+              <button
+                onClick={clearFilters}
+                className="px-4 py-2 text-red-600 hover:text-red-700 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors flex items-center gap-1"
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+                Clear
+              </button>
+            )}
+          </div>
+        </div>
+      </div>
+
       {/* Main Content */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {loading ? (
@@ -78,19 +197,29 @@ export default function Dashboard() {
           <div className="bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 p-4 rounded-lg text-center">
             {error}
           </div>
-        ) : jobs.length === 0 ? (
+        ) : filteredJobs.length === 0 ? (
           <div className="text-center py-16">
-            <div className="text-6xl mb-4">📭</div>
+            <div className="text-6xl mb-4">{hasActiveFilters ? '🔍' : '📭'}</div>
             <h2 className="text-xl font-semibold text-gray-700 dark:text-gray-300">
-              No jobs saved yet
+              {hasActiveFilters ? 'No jobs match your filters' : 'No jobs saved yet'}
             </h2>
             <p className="text-gray-500 dark:text-gray-400 mt-2">
-              Use the Chrome extension or run the scraper to add jobs.
+              {hasActiveFilters 
+                ? 'Try adjusting your filters or search query.' 
+                : 'Use the Chrome extension or run the scraper to add jobs.'}
             </p>
+            {hasActiveFilters && (
+              <button
+                onClick={clearFilters}
+                className="mt-4 text-blue-600 hover:text-blue-700 underline"
+              >
+                Clear all filters
+              </button>
+            )}
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {jobs.map((job) => (
+            {filteredJobs.map((job) => (
               <JobCard key={job.id} job={job} onDelete={handleDelete} />
             ))}
           </div>
