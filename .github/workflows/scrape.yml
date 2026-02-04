@@ -33,6 +33,7 @@ jobs:
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+          REED_API_KEY: ${{ secrets.REED_API_KEY }}
           SCRAPE_KEYWORDS: ${{ vars.SCRAPE_KEYWORDS || 'software engineer' }}
           SCRAPE_LOCATION: ${{ vars.SCRAPE_LOCATION || 'United Kingdom' }}
           SCRAPE_MAX_JOBS: ${{ vars.SCRAPE_MAX_JOBS || '25' }}

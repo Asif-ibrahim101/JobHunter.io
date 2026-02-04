@@ -1,6 +1,7 @@
 const cron = require('node-cron');
 const { scrapeLinkedInJobs, saveJobsToSupabase: saveLinkedInJobs, CONFIG: linkedInConfig } = require('./scraper');
 const { scrapeGlassdoorJobs, saveJobsToSupabase: saveGlassdoorJobs, CONFIG: glassdoorConfig } = require('./glassdoor');
+const { scrapeReedJobs, saveJobsToSupabase: saveReedJobs, CONFIG: reedConfig } = require('./reed');
 
 const isRunNow = process.argv.includes('--run-now');
 
@@ -47,6 +48,27 @@ async function runGlassdoorScraper() {
 }
 
 /**
+ * Run Reed scraper (visa sponsorship jobs)
+ */
+async function runReedScraper() {
+    console.log('\n🟠 Starting Reed scraper (visa sponsorship)...');
+    console.log(`⏰ Time: ${new Date().toISOString()}`);
+
+    try {
+        const jobs = await scrapeReedJobs({
+            keywords: process.env.REED_KEYWORDS || reedConfig.keywords,
+            location: process.env.REED_LOCATION || reedConfig.location,
+            maxJobs: parseInt(process.env.REED_MAX_JOBS) || reedConfig.maxJobs,
+        });
+
+        await saveReedJobs(jobs);
+        console.log('✅ Reed scraping complete!');
+    } catch (error) {
+        console.error('❌ Reed scraper failed:', error);
+    }
+}
+
+/**
  * Run all scrapers
  */
 async function runAllScrapers() {
@@ -55,6 +77,7 @@ async function runAllScrapers() {
 
     await runLinkedInScraper();
     await runGlassdoorScraper();
+    await runReedScraper();
 
     console.log('\n================================');
     console.log('✅ All scrapers complete!\n');
@@ -70,7 +93,7 @@ if (isRunNow) {
 } else {
     // Schedule to run every 6 hours
     console.log('📅 Scheduling scrapers to run every 6 hours...');
-    console.log('   Sources: LinkedIn, Glassdoor');
+    console.log('   Sources: LinkedIn, Glassdoor, Reed (visa sponsorship)');
     console.log('   (Use "npm run scrape" to run immediately)\n');
 
     cron.schedule('0 */6 * * *', () => {
