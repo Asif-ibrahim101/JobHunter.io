@@ -67,6 +67,9 @@ export default function JobCard({ job, onDelete, isSaved, onToggleSave }: JobCar
         if (source?.toLowerCase().includes('glassdoor')) {
             return { bg: 'bg-green-100 dark:bg-green-900/30', text: 'text-green-700 dark:text-green-300', icon: '🚪' };
         }
+        if (source?.toLowerCase().includes('reed')) {
+            return { bg: 'bg-pink-100 dark:bg-pink-900/30', text: 'text-pink-700 dark:text-pink-300', icon: '💼' };
+        }
         return { bg: 'bg-gray-100 dark:bg-gray-700', text: 'text-gray-600 dark:text-gray-300', icon: '📌' };
     };
 

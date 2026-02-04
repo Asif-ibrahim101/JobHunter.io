@@ -5,6 +5,8 @@ export const normalizeSource = (source?: string) => {
   const lower = cleaned.toLowerCase();
   if (lower.includes('linkedin')) return 'LinkedIn';
   if (lower.includes('glassdoor')) return 'Glassdoor';
+  if (lower.includes('reed')) return 'Reed.co.uk';
+  if (lower.includes('reed.co.uk')) return 'Reed.co.uk';
   return cleaned;
 };
 
@@ -28,7 +30,9 @@ export const normalizeLogoUrl = (logo?: string, source?: string) => {
         ? 'https://www.glassdoor.co.uk'
         : sourceLower.includes('linkedin')
           ? 'https://www.linkedin.com'
-          : '';
+          : sourceLower.includes('reed')
+            ? 'https://www.reed.co.uk'
+            : '';
     if (!base) return '';
     url = `${base}${url}`;
   }

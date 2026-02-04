@@ -32,6 +32,7 @@ function DashboardContent() {
   const [selectedSource, setSelectedSource] = useState('');
   const [selectedDateFilter, setSelectedDateFilter] = useState('');
   const [showSavedOnly, setShowSavedOnly] = useState(false);
+  const [showVisaSponsoredOnly, setShowVisaSponsoredOnly] = useState(false);
 
   useEffect(() => {
     fetchJobs();
@@ -166,7 +167,14 @@ function DashboardContent() {
       const matchesDate = !dateCutoff || new Date(job.created_at) >= dateCutoff;
       const matchesSaved = !showSavedOnly || savedJobIds.has(job.id);
 
-      return matchesSearch && matchesCompany && matchesLocation && matchesSource && matchesDate && matchesSaved;
+      const isReed = normalizeSource(job.source) === 'Reed.co.uk';
+      const hasVisaKeywords = (job.description || '').toLowerCase().includes('visa') ||
+        (job.description || '').toLowerCase().includes('sponsorship') ||
+        job.title.toLowerCase().includes('visa');
+
+      const matchesVisa = !showVisaSponsoredOnly || isReed || hasVisaKeywords;
+
+      return matchesSearch && matchesCompany && matchesLocation && matchesSource && matchesDate && matchesSaved && matchesVisa;
     });
   }, [jobs, searchQuery, selectedCompany, selectedLocation, selectedSource, selectedDateFilter, showSavedOnly, savedJobIds]);
 
@@ -177,9 +185,10 @@ function DashboardContent() {
     setSelectedSource('');
     setSelectedDateFilter('');
     setShowSavedOnly(false);
+    setShowVisaSponsoredOnly(false);
   };
 
-  const hasActiveFilters = searchQuery || selectedCompany || selectedLocation || selectedSource || selectedDateFilter || showSavedOnly;
+  const hasActiveFilters = searchQuery || selectedCompany || selectedLocation || selectedSource || selectedDateFilter || showSavedOnly || showVisaSponsoredOnly;
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800">
@@ -199,6 +208,15 @@ function DashboardContent() {
               <span className="bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 px-3 py-1 rounded-full text-sm font-medium">
                 {filteredJobs.length} of {jobs.length} jobs
               </span>
+              <a
+                href="/jobs/search"
+                className="flex items-center gap-2 text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 px-3 py-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                </svg>
+                <span className="hidden sm:inline">Search Jobs</span>
+              </a>
               <a
                 href="/dashboard"
                 className="flex items-center gap-2 text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 px-3 py-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
@@ -341,6 +359,20 @@ function DashboardContent() {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
               </svg>
               Saved
+            </button>
+
+            {/* Visa Sponsored Toggle */}
+            <button
+              onClick={() => setShowVisaSponsoredOnly(!showVisaSponsoredOnly)}
+              className={`px-4 py-2 rounded-lg border transition-colors flex items-center gap-2 ${showVisaSponsoredOnly
+                ? 'bg-purple-50 dark:bg-purple-900/20 border-purple-200 text-purple-700 dark:text-purple-400'
+                : 'bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50'
+                }`}
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              Visa Sponsored
             </button>
 
             {/* Clear Filters */}

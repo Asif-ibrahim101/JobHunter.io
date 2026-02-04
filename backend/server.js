@@ -4,8 +4,8 @@ const OpenAI = require('openai');
 const supabase = require('./db');
 const path = require('path');
 
-// Load environment variables
-require('dotenv').config({ path: path.join(__dirname, '..', '.env.local') });
+// Load environment variables from backend/.env.local
+require('dotenv').config({ path: path.join(__dirname, '.env.local') });
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -20,6 +20,8 @@ app.use(cors());
 app.use(express.json());
 
 // Routes
+const jobSearchRoute = require('./routes/jobs_search');
+app.use('/api/jobs', jobSearchRoute); // Mounts at /api/jobs/search
 
 // GET /api/jobs - List all saved jobs
 app.get('/api/jobs', async (req, res) => {
