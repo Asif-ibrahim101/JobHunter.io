@@ -15,7 +15,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "JobAutomate - Your Job Search Assistant",
+  title: "JobLee - Your Job Search Assistant",
   description: "Automate your job search with AI-powered tools",
 };
 
