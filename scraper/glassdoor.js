@@ -74,6 +74,32 @@ async function scrapeGlassdoorJobs(options = {}) {
                 const locationEl = card.querySelector('[data-test="emp-location"], .JobCard_location__Ds1fM, .location');
                 const linkEl = card.querySelector('a[href*="/job-listing/"], a[data-test="job-link"]');
                 const logoEl = card.querySelector('[data-test="employer-logo"] img, .JobCard_logo__2mS8Z img, img[alt*="Logo"]');
+                let logo = '';
+                if (logoEl) {
+                    const direct =
+                        logoEl.getAttribute('src') ||
+                        logoEl.getAttribute('data-src') ||
+                        logoEl.getAttribute('data-original') ||
+                        logoEl.getAttribute('data-delayed-url') ||
+                        logoEl.getAttribute('data-lazy') ||
+                        '';
+                    const srcset =
+                        logoEl.getAttribute('srcset') ||
+                        logoEl.getAttribute('data-srcset') ||
+                        '';
+                    logo = direct;
+                    if (!logo && srcset) {
+                        const first = srcset.split(',')[0]?.trim().split(' ')[0];
+                        if (first) logo = first;
+                    }
+                    if (logo) {
+                        try {
+                            logo = new URL(logo, window.location.origin).href;
+                        } catch (e) {
+                            // keep original if URL parsing fails
+                        }
+                    }
+                }
 
                 if (titleEl) {
                     results.push({
@@ -81,7 +107,7 @@ async function scrapeGlassdoorJobs(options = {}) {
                         company: companyEl?.textContent?.trim() || '',
                         location: locationEl?.textContent?.trim() || '',
                         url: linkEl?.href || '',
-                        logo: logoEl?.getAttribute('src') || '',
+                        logo,
                     });
                 }
             });

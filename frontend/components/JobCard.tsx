@@ -2,6 +2,7 @@
 
 import { Job } from '@/types/job';
 import { supabase } from '@/lib/supabase';
+import { normalizeLogoUrl, normalizeSource } from '@/lib/job-utils';
 import { useState } from 'react';
 import AnswerModal from './AnswerModal';
 
@@ -67,7 +68,9 @@ export default function JobCard({ job, onDelete }: JobCardProps) {
         return { bg: 'bg-gray-100 dark:bg-gray-700', text: 'text-gray-600 dark:text-gray-300', icon: '📌' };
     };
 
-    const sourceBadge = getSourceBadge(job.source);
+    const normalizedSource = normalizeSource(job.source);
+    const sourceBadge = getSourceBadge(normalizedSource);
+    const logoUrl = normalizeLogoUrl(job.logo, job.source);
 
     return (
         <>
@@ -79,9 +82,9 @@ export default function JobCard({ job, onDelete }: JobCardProps) {
                     {/* Header with logo and bookmark */}
                     <div className="flex items-start gap-4">
                         {/* Company Logo */}
-                        {job.logo && !imageError ? (
+                        {logoUrl && !imageError ? (
                             <img
-                                src={job.logo}
+                                src={logoUrl}
                                 alt={`${job.company} logo`}
                                 className="w-12 h-12 rounded-xl object-contain bg-white border border-gray-100 dark:border-gray-700 shadow-sm p-1"
                                 onError={() => setImageError(true)}
@@ -128,7 +131,7 @@ export default function JobCard({ job, onDelete }: JobCardProps) {
                             {formatDate(job.created_at)}
                         </span>
                         <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${sourceBadge.bg} ${sourceBadge.text}`}>
-                            {sourceBadge.icon} {job.source}
+                            {sourceBadge.icon} {normalizedSource || job.source}
                         </span>
                     </div>
 
