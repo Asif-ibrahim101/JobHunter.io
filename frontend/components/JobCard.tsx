@@ -10,13 +10,14 @@ import AnswerModal from './AnswerModal';
 interface JobCardProps {
     job: Job;
     onDelete: (id: string) => void;
+    isSaved: boolean;
+    onToggleSave: (id: string) => void;
 }
 
-export default function JobCard({ job, onDelete }: JobCardProps) {
+export default function JobCard({ job, onDelete, isSaved, onToggleSave }: JobCardProps) {
     const [isDeleting, setIsDeleting] = useState(false);
     const [expanded, setExpanded] = useState(false);
     const [showAnswerModal, setShowAnswerModal] = useState(false);
-    const [isBookmarked, setIsBookmarked] = useState(false);
     const [imageError, setImageError] = useState(false);
 
     const handleDelete = async () => {
@@ -102,10 +103,11 @@ export default function JobCard({ job, onDelete }: JobCardProps) {
                                     {job.title}
                                 </h3>
                                 <button
-                                    onClick={() => setIsBookmarked(!isBookmarked)}
+                                    onClick={() => onToggleSave(job.id)}
                                     className="flex-shrink-0 p-1.5 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                                    title={isSaved ? "Unsave Job" : "Save Job"}
                                 >
-                                    <svg className={`w-5 h-5 ${isBookmarked ? 'text-yellow-500 fill-yellow-500' : 'text-gray-400'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <svg className={`w-5 h-5 ${isSaved ? 'text-yellow-500 fill-yellow-500' : 'text-gray-400'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
                                     </svg>
                                 </button>

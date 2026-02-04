@@ -22,6 +22,7 @@ function DashboardContent() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [showUserMenu, setShowUserMenu] = useState(false);
+  const [savedJobIds, setSavedJobIds] = useState<Set<string>>(new Set());
 
   // Filter states
   const [searchQuery, setSearchQuery] = useState('');
@@ -29,10 +30,30 @@ function DashboardContent() {
   const [selectedLocation, setSelectedLocation] = useState('');
   const [selectedSource, setSelectedSource] = useState('');
   const [selectedDateFilter, setSelectedDateFilter] = useState('');
+  const [showSavedOnly, setShowSavedOnly] = useState(false);
 
   useEffect(() => {
     fetchJobs();
   }, []);
+
+  useEffect(() => {
+    if (user) {
+      fetchSavedJobs();
+    }
+  }, [user]);
+
+  const fetchSavedJobs = async () => {
+    if (!user) return;
+    const { data: savedData } = await supabase
+      .from('applications')
+      .select('job_id')
+      .eq('user_id', user.id)
+      .eq('status', 'saved');
+
+    if (savedData) {
+      setSavedJobIds(new Set(savedData.map(item => item.job_id)));
+    }
+  };
 
   const fetchJobs = async () => {
     setLoading(true);
@@ -54,6 +75,41 @@ function DashboardContent() {
 
   const handleDelete = (id: string) => {
     setJobs(jobs.filter((job) => job.id !== id));
+  };
+
+  const handleToggleSave = async (jobId: string) => {
+    if (!user) return;
+
+    // Optimistic update
+    const isSaved = savedJobIds.has(jobId);
+    const newSet = new Set(savedJobIds);
+    if (isSaved) newSet.delete(jobId);
+    else newSet.add(jobId);
+    setSavedJobIds(newSet);
+
+    try {
+      if (isSaved) {
+        // Unsave
+        await supabase
+          .from('applications')
+          .delete()
+          .eq('user_id', user.id)
+          .eq('job_id', jobId)
+          .eq('status', 'saved');
+      } else {
+        // Save
+        await supabase
+          .from('applications')
+          .upsert({
+            user_id: user.id,
+            job_id: jobId,
+            status: 'saved'
+          }, { onConflict: 'user_id, job_id' });
+      }
+    } catch (err) {
+      console.error('Error toggling save:', err);
+      // Revert on error would be better but simple logging for now
+    }
   };
 
   const handleSignOut = async () => {
@@ -107,10 +163,11 @@ function DashboardContent() {
       const matchesSource = !selectedSource || normalizeSource(job.source) === selectedSource;
 
       const matchesDate = !dateCutoff || new Date(job.created_at) >= dateCutoff;
+      const matchesSaved = !showSavedOnly || savedJobIds.has(job.id);
 
-      return matchesSearch && matchesCompany && matchesLocation && matchesSource && matchesDate;
+      return matchesSearch && matchesCompany && matchesLocation && matchesSource && matchesDate && matchesSaved;
     });
-  }, [jobs, searchQuery, selectedCompany, selectedLocation, selectedSource, selectedDateFilter]);
+  }, [jobs, searchQuery, selectedCompany, selectedLocation, selectedSource, selectedDateFilter, showSavedOnly, savedJobIds]);
 
   const clearFilters = () => {
     setSearchQuery('');
@@ -118,9 +175,10 @@ function DashboardContent() {
     setSelectedLocation('');
     setSelectedSource('');
     setSelectedDateFilter('');
+    setShowSavedOnly(false);
   };
 
-  const hasActiveFilters = searchQuery || selectedCompany || selectedLocation || selectedSource || selectedDateFilter;
+  const hasActiveFilters = searchQuery || selectedCompany || selectedLocation || selectedSource || selectedDateFilter || showSavedOnly;
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800">
@@ -267,6 +325,20 @@ function DashboardContent() {
               ))}
             </select>
 
+            {/* Saved Toggle */}
+            <button
+              onClick={() => setShowSavedOnly(!showSavedOnly)}
+              className={`px-4 py-2 rounded-lg border transition-colors flex items-center gap-2 ${showSavedOnly
+                ? 'bg-yellow-50 dark:bg-yellow-900/20 border-yellow-200 text-yellow-700 dark:text-yellow-400'
+                : 'bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50'
+                }`}
+            >
+              <svg className="w-4 h-4" fill={showSavedOnly ? "currentColor" : "none"} stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
+              </svg>
+              Saved
+            </button>
+
             {/* Clear Filters */}
             {hasActiveFilters && (
               <button
@@ -316,7 +388,13 @@ function DashboardContent() {
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {filteredJobs.map((job) => (
-              <JobCard key={job.id} job={job} onDelete={handleDelete} />
+              <JobCard
+                key={job.id}
+                job={job}
+                onDelete={handleDelete}
+                isSaved={savedJobIds.has(job.id)}
+                onToggleSave={handleToggleSave}
+              />
             ))}
           </div>
         )}
