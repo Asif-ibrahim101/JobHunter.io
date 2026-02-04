@@ -7,6 +7,7 @@ import JobCard from '@/components/JobCard';
 import { normalizeSource } from '@/lib/job-utils';
 import ProtectedRoute from '@/components/ProtectedRoute';
 import { useAuth } from '@/context/AuthContext';
+import { ThemeToggle } from '@/components/ThemeToggle';
 
 // Date filter options
 const DATE_FILTERS = [
@@ -216,6 +217,9 @@ function DashboardContent() {
                 </svg>
                 <span className="hidden sm:inline">Profile</span>
               </a>
+
+              {/* Theme Toggle */}
+              <ThemeToggle />
 
               {/* User Menu */}
               <div className="relative">
