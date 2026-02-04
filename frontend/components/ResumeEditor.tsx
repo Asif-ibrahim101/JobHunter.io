@@ -158,18 +158,18 @@ export default function ResumeEditor({ content, onUpdate, onRegenerate, generati
     return (
         <div className="h-full flex flex-col">
             {/* Header with ATS Score */}
-            <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+            <div className="px-4 sm:px-6 py-4 border-b border-gray-200 dark:border-gray-700">
                 <div className="flex items-center justify-between mb-4">
                     <h3 className="font-semibold text-gray-900 dark:text-white">Resume Editor</h3>
                     <button
                         onClick={onRegenerate}
                         disabled={generating}
-                        className="flex items-center gap-2 text-sm text-purple-600 dark:text-purple-400 hover:text-purple-700 dark:hover:text-purple-300 disabled:opacity-50 transition-colors"
+                        className="flex items-center gap-2 text-sm text-purple-600 dark:text-purple-400 hover:text-purple-700 dark:hover:text-purple-300 disabled:opacity-50 transition-colors min-h-[44px] px-3"
                     >
                         <svg className={`w-4 h-4 ${generating ? 'animate-spin' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
                         </svg>
-                        Regenerate
+                        <span className="hidden sm:inline">Regenerate</span>
                     </button>
                 </div>
 
@@ -202,7 +202,7 @@ export default function ResumeEditor({ content, onUpdate, onRegenerate, generati
 
                         {/* Keywords Analysis */}
                         {content.analysis && (
-                            <div className="grid grid-cols-2 gap-4 text-sm">
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
                                 <div>
                                     <p className="font-medium text-green-700 dark:text-green-400 mb-1 flex items-center gap-1">
                                         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -268,17 +268,19 @@ export default function ResumeEditor({ content, onUpdate, onRegenerate, generati
                 )}
 
                 {/* Tabs */}
-                <div className="flex gap-1 bg-gray-100 dark:bg-gray-700 rounded-lg p-1">
+                <div className="flex gap-1 bg-gray-100 dark:bg-gray-700 rounded-lg p-1 overflow-x-auto -mx-4 px-4 sm:mx-0 sm:px-1">
                     {(['skills', 'experience', 'projects', 'achievements'] as const).map((tab) => (
                         <button
                             key={tab}
                             onClick={() => setActiveTab(tab)}
-                            className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition-colors ${activeTab === tab
+                            className={`flex-1 py-2 px-2 sm:px-4 rounded-md text-xs sm:text-sm font-medium transition-colors whitespace-nowrap min-h-[40px] ${activeTab === tab
                                 ? 'bg-white dark:bg-gray-600 text-gray-900 dark:text-white shadow-sm'
                                 : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
                                 }`}
                         >
-                            {tab.charAt(0).toUpperCase() + tab.slice(1)} ({
+                            <span className="hidden sm:inline">{tab.charAt(0).toUpperCase() + tab.slice(1)}</span>
+                            <span className="sm:hidden">{tab.slice(0, 3).charAt(0).toUpperCase() + tab.slice(1, 3)}</span>
+                            {' '}({
                                 tab === 'skills' ? content.skills.length :
                                     tab === 'experience' ? content.experience.length :
                                         tab === 'projects' ? content.projects.length :
@@ -290,7 +292,7 @@ export default function ResumeEditor({ content, onUpdate, onRegenerate, generati
             </div>
 
             {/* Content */}
-            <div className="flex-1 overflow-y-auto p-6">
+            <div className="flex-1 overflow-y-auto p-4 sm:p-6">
                 {/* Skills Tab */}
                 {activeTab === 'skills' && (
                     <div className="space-y-3">
@@ -348,18 +350,18 @@ export default function ResumeEditor({ content, onUpdate, onRegenerate, generati
                         {showAddExperience && (
                             <form onSubmit={addExperience} className="bg-white dark:bg-gray-800 border border-blue-200 dark:border-blue-800 rounded-xl p-4 shadow-sm animate-fade-in-down">
                                 <h4 className="font-medium mb-3 text-blue-700 dark:text-blue-400">Add New Experience</h4>
-                                <div className="grid grid-cols-2 gap-3 mb-3">
-                                    <input name="title" placeholder="Job Title" required className="input-sm border rounded px-2 py-1 dark:bg-gray-700 dark:border-gray-600" />
-                                    <input name="company" placeholder="Company" required className="input-sm border rounded px-2 py-1 dark:bg-gray-700 dark:border-gray-600" />
-                                    <input name="location" placeholder="Location" className="input-sm border rounded px-2 py-1 dark:bg-gray-700 dark:border-gray-600" />
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-3">
+                                    <input name="title" placeholder="Job Title" required className="input-sm border rounded px-3 py-2 min-h-[44px] dark:bg-gray-700 dark:border-gray-600" />
+                                    <input name="company" placeholder="Company" required className="input-sm border rounded px-3 py-2 min-h-[44px] dark:bg-gray-700 dark:border-gray-600" />
+                                    <input name="location" placeholder="Location" className="input-sm border rounded px-3 py-2 min-h-[44px] dark:bg-gray-700 dark:border-gray-600" />
                                     <div className="flex gap-2">
-                                        <input name="startDate" placeholder="Start Date" required className="w-1/2 input-sm border rounded px-2 py-1 dark:bg-gray-700 dark:border-gray-600" />
-                                        <input name="endDate" placeholder="End Date" required className="w-1/2 input-sm border rounded px-2 py-1 dark:bg-gray-700 dark:border-gray-600" />
+                                        <input name="startDate" placeholder="Start Date" required className="w-1/2 input-sm border rounded px-3 py-2 min-h-[44px] dark:bg-gray-700 dark:border-gray-600" />
+                                        <input name="endDate" placeholder="End Date" required className="w-1/2 input-sm border rounded px-3 py-2 min-h-[44px] dark:bg-gray-700 dark:border-gray-600" />
                                     </div>
                                 </div>
-                                <div className="flex justify-end gap-2">
-                                    <button type="button" onClick={() => setShowAddExperience(false)} className="text-sm text-gray-500 hover:text-gray-700">Cancel</button>
-                                    <button type="submit" className="text-sm bg-blue-600 text-white px-3 py-1 rounded hover:bg-blue-700">Add</button>
+                                <div className="flex flex-col sm:flex-row justify-end gap-2">
+                                    <button type="button" onClick={() => setShowAddExperience(false)} className="text-sm text-gray-500 hover:text-gray-700 py-2 min-h-[44px]">Cancel</button>
+                                    <button type="submit" className="text-sm bg-blue-600 text-white px-4 py-2 min-h-[44px] rounded hover:bg-blue-700">Add</button>
                                 </div>
                             </form>
                         )}
@@ -453,12 +455,12 @@ export default function ResumeEditor({ content, onUpdate, onRegenerate, generati
                             <form onSubmit={addProject} className="bg-white dark:bg-gray-800 border border-blue-200 dark:border-blue-800 rounded-xl p-4 shadow-sm animate-fade-in-down">
                                 <h4 className="font-medium mb-3 text-blue-700 dark:text-blue-400">Add New Project</h4>
                                 <div className="grid grid-cols-1 gap-3 mb-3">
-                                    <input name="name" placeholder="Project Name" required className="input-sm border rounded px-2 py-1 dark:bg-gray-700 dark:border-gray-600" />
-                                    <input name="technologies" placeholder="Technologies (comma separated)" required className="input-sm border rounded px-2 py-1 dark:bg-gray-700 dark:border-gray-600" />
+                                    <input name="name" placeholder="Project Name" required className="input-sm border rounded px-3 py-2 min-h-[44px] dark:bg-gray-700 dark:border-gray-600" />
+                                    <input name="technologies" placeholder="Technologies (comma separated)" required className="input-sm border rounded px-3 py-2 min-h-[44px] dark:bg-gray-700 dark:border-gray-600" />
                                 </div>
-                                <div className="flex justify-end gap-2">
-                                    <button type="button" onClick={() => setShowAddProject(false)} className="text-sm text-gray-500 hover:text-gray-700">Cancel</button>
-                                    <button type="submit" className="text-sm bg-blue-600 text-white px-3 py-1 rounded hover:bg-blue-700">Add</button>
+                                <div className="flex flex-col sm:flex-row justify-end gap-2">
+                                    <button type="button" onClick={() => setShowAddProject(false)} className="text-sm text-gray-500 hover:text-gray-700 py-2 min-h-[44px]">Cancel</button>
+                                    <button type="submit" className="text-sm bg-blue-600 text-white px-4 py-2 min-h-[44px] rounded hover:bg-blue-700">Add</button>
                                 </div>
                             </form>
                         )}

@@ -144,19 +144,19 @@ function ProfileContent() {
         <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800">
             {/* Header */}
             <header className="bg-white dark:bg-gray-800 shadow-sm border-b border-gray-200 dark:border-gray-700">
-                <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-                    <div className="flex justify-between items-center">
+                <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6">
+                    <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
                         <div>
-                            <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+                            <h1 className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
                                 Profile
                             </h1>
-                            <p className="text-gray-500 dark:text-gray-400 mt-1">
+                            <p className="text-sm sm:text-base text-gray-500 dark:text-gray-400 mt-1">
                                 Manage your personal information
                             </p>
                         </div>
                         <Link
                             href="/"
-                            className="flex items-center gap-2 text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
+                            className="flex items-center gap-2 text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors min-h-[44px]"
                         >
                             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
@@ -168,7 +168,7 @@ function ProfileContent() {
             </header>
 
             {/* Main Content */}
-            <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
                 <form onSubmit={handleSubmit} className="space-y-8">
                     {/* Personal Information */}
                     <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg border border-gray-200 dark:border-gray-700 p-6">
@@ -380,17 +380,17 @@ function ProfileContent() {
                     )}
 
                     {/* Save Button */}
-                    <div className="flex justify-end">
+                    <div className="flex justify-center sm:justify-end">
                         <button
                             type="submit"
                             disabled={saving}
                             className={`
-                px-8 py-3 rounded-xl font-semibold text-white
-                bg-gradient-to-r from-blue-600 to-purple-600 
+                w-full sm:w-auto px-8 py-3 min-h-[48px] rounded-xl font-semibold text-white
+                bg-gradient-to-r from-blue-600 to-purple-600
                 hover:from-blue-700 hover:to-purple-700
                 focus:ring-4 focus:ring-blue-500/50
                 transition-all duration-200
-                flex items-center gap-2
+                flex items-center justify-center gap-2
                 ${saving ? 'opacity-70 cursor-not-allowed' : ''}
               `}
                         >

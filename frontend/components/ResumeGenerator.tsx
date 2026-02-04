@@ -33,6 +33,7 @@ export default function ResumeGenerator({ job }: ResumeGeneratorProps) {
     const [error, setError] = useState<string | null>(null);
     const [showPdfModal, setShowPdfModal] = useState(false);
     const [saving, setSaving] = useState(false);
+    const [mobileView, setMobileView] = useState<'preview' | 'editor'>('preview');
 
     const handleGenerate = async () => {
         if (!user) return;
@@ -200,24 +201,24 @@ export default function ResumeGenerator({ job }: ResumeGeneratorProps) {
     // Initial state - show generate button
     if (!resumeContent && !generating) {
         return (
-            <div className="flex-1 flex items-center justify-center p-8">
+            <div className="flex-1 flex items-center justify-center p-4 sm:p-8">
                 <div className="text-center max-w-md">
-                    <div className="w-20 h-20 bg-gradient-to-br from-purple-100 to-indigo-100 dark:from-purple-900/30 dark:to-indigo-900/30 rounded-2xl flex items-center justify-center mx-auto mb-6">
-                        <svg className="w-10 h-10 text-purple-600 dark:text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <div className="w-16 h-16 sm:w-20 sm:h-20 bg-gradient-to-br from-purple-100 to-indigo-100 dark:from-purple-900/30 dark:to-indigo-900/30 rounded-2xl flex items-center justify-center mx-auto mb-4 sm:mb-6">
+                        <svg className="w-8 h-8 sm:w-10 sm:h-10 text-purple-600 dark:text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                         </svg>
                     </div>
-                    <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
+                    <h2 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white mb-2">
                         Generate Tailored Resume
                     </h2>
-                    <p className="text-gray-600 dark:text-gray-400 mb-6">
+                    <p className="text-sm sm:text-base text-gray-600 dark:text-gray-400 mb-6">
                         AI will create a resume tailored to this job description using your profile data.
                     </p>
                     <button
                         onClick={handleGenerate}
-                        className="bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white px-8 py-4 rounded-xl font-semibold text-lg transition-all shadow-lg hover:shadow-xl flex items-center gap-3 mx-auto"
+                        className="w-full sm:w-auto bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white px-6 sm:px-8 py-3 sm:py-4 min-h-[48px] rounded-xl font-semibold text-base sm:text-lg transition-all shadow-lg hover:shadow-xl flex items-center justify-center gap-3 mx-auto"
                     >
-                        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg className="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
                         </svg>
                         Generate Resume
@@ -275,9 +276,45 @@ export default function ResumeGenerator({ job }: ResumeGeneratorProps) {
 
     // Split view with PDF and Editor
     return (
-        <div className="flex-1 flex h-[calc(100vh-64px)]">
-            {/* PDF Preview - Left Side */}
-            <div className="w-1/2 border-r border-gray-200 dark:border-gray-700 bg-gray-100 dark:bg-gray-900 overflow-hidden">
+        <div className="flex-1 flex flex-col md:flex-row h-[calc(100vh-64px)]">
+            {/* Mobile Tab Navigation */}
+            <div className="md:hidden flex border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800">
+                <button
+                    onClick={() => setMobileView('preview')}
+                    className={`flex-1 py-3 px-4 text-center font-medium min-h-[48px] transition-colors ${
+                        mobileView === 'preview'
+                            ? 'text-purple-600 dark:text-purple-400 border-b-2 border-purple-600 dark:border-purple-400 bg-purple-50 dark:bg-purple-900/20'
+                            : 'text-gray-600 dark:text-gray-400'
+                    }`}
+                >
+                    <span className="flex items-center justify-center gap-2">
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                        </svg>
+                        Preview
+                    </span>
+                </button>
+                <button
+                    onClick={() => setMobileView('editor')}
+                    className={`flex-1 py-3 px-4 text-center font-medium min-h-[48px] transition-colors ${
+                        mobileView === 'editor'
+                            ? 'text-purple-600 dark:text-purple-400 border-b-2 border-purple-600 dark:border-purple-400 bg-purple-50 dark:bg-purple-900/20'
+                            : 'text-gray-600 dark:text-gray-400'
+                    }`}
+                >
+                    <span className="flex items-center justify-center gap-2">
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                        </svg>
+                        Editor
+                    </span>
+                </button>
+            </div>
+
+            {/* PDF Preview - Left Side on desktop, conditional on mobile */}
+            <div className={`md:w-1/2 md:border-r border-gray-200 dark:border-gray-700 bg-gray-100 dark:bg-gray-900 overflow-hidden ${
+                mobileView === 'preview' ? 'flex-1' : 'hidden'
+            } md:block`}>
                 <PDFPreview
                     pdfUrl={pdfUrl}
                     loading={compiling}
@@ -288,8 +325,10 @@ export default function ResumeGenerator({ job }: ResumeGeneratorProps) {
                 />
             </div>
 
-            {/* Editor - Right Side */}
-            <div className="w-1/2 overflow-y-auto bg-white dark:bg-gray-800">
+            {/* Editor - Right Side on desktop, conditional on mobile */}
+            <div className={`md:w-1/2 overflow-y-auto bg-white dark:bg-gray-800 ${
+                mobileView === 'editor' ? 'flex-1' : 'hidden'
+            } md:block`}>
                 <ResumeEditor
                     content={resumeContent!}
                     onUpdate={handleContentUpdate}
@@ -299,25 +338,25 @@ export default function ResumeGenerator({ job }: ResumeGeneratorProps) {
                 />
             </div>
 
-            {/* Full Screen PDF Modal */}
+            {/* Full Screen PDF Modal - full screen on mobile */}
             {showPdfModal && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4 animate-fade-in">
-                    <div className="bg-white dark:bg-gray-900 w-full max-w-6xl h-[90vh] rounded-2xl shadow-2xl flex flex-col overflow-hidden animate-scale-up">
-                        <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200 dark:border-gray-700">
-                            <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Full Screen Preview</h3>
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-0 sm:p-4">
+                    <div className="bg-white dark:bg-gray-900 w-full h-full sm:max-w-6xl sm:h-[90vh] sm:rounded-2xl shadow-2xl flex flex-col overflow-hidden">
+                        <div className="flex items-center justify-between px-4 sm:px-6 py-3 sm:py-4 border-b border-gray-200 dark:border-gray-700">
+                            <h3 className="text-base sm:text-lg font-semibold text-gray-900 dark:text-white">Full Screen Preview</h3>
                             <button
                                 onClick={() => setShowPdfModal(false)}
-                                className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-full transition-colors"
+                                className="p-2 min-h-[44px] min-w-[44px] flex items-center justify-center hover:bg-gray-100 dark:hover:bg-gray-800 rounded-full transition-colors"
                             >
                                 <svg className="w-6 h-6 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                                 </svg>
                             </button>
                         </div>
-                        <div className="flex-1 overflow-hidden p-4 bg-gray-100 dark:bg-gray-900/50">
+                        <div className="flex-1 overflow-hidden p-2 sm:p-4 bg-gray-100 dark:bg-gray-900/50">
                             <iframe
                                 src={pdfUrl!}
-                                className="w-full h-full rounded-xl shadow-inner bg-white"
+                                className="w-full h-full sm:rounded-xl shadow-inner bg-white"
                                 title="Resume PDF Full Screen"
                             />
                         </div>

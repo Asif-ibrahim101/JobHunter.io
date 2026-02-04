@@ -5,7 +5,6 @@ import { supabase } from '@/lib/supabase';
 import { normalizeLogoUrl, normalizeSource } from '@/lib/job-utils';
 import { useState } from 'react';
 import Link from 'next/link';
-import AnswerModal from './AnswerModal';
 
 interface JobCardProps {
     job: Job;
@@ -17,7 +16,6 @@ interface JobCardProps {
 export default function JobCard({ job, onDelete, isSaved, onToggleSave }: JobCardProps) {
     const [isDeleting, setIsDeleting] = useState(false);
     const [expanded, setExpanded] = useState(false);
-    const [showAnswerModal, setShowAnswerModal] = useState(false);
     const [imageError, setImageError] = useState(false);
 
     const handleDelete = async () => {
@@ -78,12 +76,11 @@ export default function JobCard({ job, onDelete, isSaved, onToggleSave }: JobCar
     const logoUrl = normalizeLogoUrl(job.logo, job.source);
 
     return (
-        <>
-            <div className="group bg-white dark:bg-gray-800 rounded-2xl shadow-sm hover:shadow-xl transition-all duration-300 border border-gray-100 dark:border-gray-700 overflow-hidden">
+        <div className="group h-full flex flex-col bg-white dark:bg-gray-800 rounded-2xl shadow-sm hover:shadow-xl transition-all duration-300 border border-gray-100 dark:border-gray-700 overflow-hidden">
                 {/* Top accent bar */}
                 <div className={`h-1 ${getLogoColor(job.company)}`} />
 
-                <div className="p-5">
+                <div className="p-5 flex-1 flex flex-col">
                     {/* Header with logo and bookmark */}
                     <div className="flex items-start gap-4">
                         {/* Company Logo */}
@@ -142,36 +139,29 @@ export default function JobCard({ job, onDelete, isSaved, onToggleSave }: JobCar
                     </div>
 
                     {/* Description */}
-                    {job.description && (
-                        <div className="mt-4">
-                            <p className={`text-gray-600 dark:text-gray-300 text-sm leading-relaxed ${expanded ? '' : 'line-clamp-3'}`}>
-                                {job.description}
-                            </p>
-                            {job.description.length > 200 && (
-                                <button
-                                    onClick={() => setExpanded(!expanded)}
-                                    className="text-blue-600 dark:text-blue-400 text-sm mt-2 hover:underline font-medium"
-                                >
-                                    {expanded ? '← Show less' : 'Read more →'}
-                                </button>
-                            )}
-                        </div>
-                    )}
+                    <div className="mt-4 flex-1">
+                        {job.description && (
+                            <>
+                                <p className={`text-gray-600 dark:text-gray-300 text-sm leading-relaxed ${expanded ? '' : 'line-clamp-3'}`}>
+                                    {job.description}
+                                </p>
+                                {job.description.length > 200 && (
+                                    <button
+                                        onClick={() => setExpanded(!expanded)}
+                                        className="text-blue-600 dark:text-blue-400 text-sm mt-2 hover:underline font-medium"
+                                    >
+                                        {expanded ? '← Show less' : 'Read more →'}
+                                    </button>
+                                )}
+                            </>
+                        )}
+                    </div>
 
                     {/* Actions */}
-                    <div className="mt-5 pt-4 border-t border-gray-100 dark:border-gray-700 flex items-center gap-2 flex-wrap">
-                        <button
-                            onClick={() => setShowAnswerModal(true)}
-                            className="flex-1 sm:flex-none text-sm bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white px-4 py-2 rounded-lg transition-all duration-200 flex items-center justify-center gap-1.5 shadow-sm hover:shadow-md"
-                        >
-                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-                            </svg>
-                            AI Answer
-                        </button>
+                    <div className="mt-auto pt-4 border-t border-gray-100 dark:border-gray-700 flex items-center gap-2 flex-wrap">
                         <Link
                             href={`/job/${job.id}`}
-                            className="flex-1 sm:flex-none text-sm bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors flex items-center justify-center gap-1.5"
+                            className="flex-1 sm:flex-none text-sm bg-blue-600 hover:bg-blue-700 text-white px-4 py-2.5 min-h-[44px] rounded-lg transition-colors flex items-center justify-center gap-1.5"
                         >
                             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
@@ -182,7 +172,7 @@ export default function JobCard({ job, onDelete, isSaved, onToggleSave }: JobCar
                         <button
                             onClick={handleDelete}
                             disabled={isDeleting}
-                            className="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors disabled:opacity-50"
+                            className="p-2.5 min-h-[44px] min-w-[44px] text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors disabled:opacity-50 flex items-center justify-center"
                             title="Delete job"
                         >
                             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -192,12 +182,5 @@ export default function JobCard({ job, onDelete, isSaved, onToggleSave }: JobCar
                     </div>
                 </div>
             </div>
-
-            <AnswerModal
-                job={job}
-                isOpen={showAnswerModal}
-                onClose={() => setShowAnswerModal(false)}
-            />
-        </>
-    );
+        );
 }

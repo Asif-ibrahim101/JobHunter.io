@@ -150,27 +150,27 @@ function SearchPageContent() {
     return (
         <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
             <header className="bg-white dark:bg-gray-800 shadow-sm border-b border-gray-200 dark:border-gray-700">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 flex justify-between items-center">
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6 flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
                     <div>
-                        <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Search Jobs</h1>
-                        <p className="text-gray-500 dark:text-gray-400 mt-1">Find visa-sponsored jobs across the UK</p>
+                        <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white">Search Jobs</h1>
+                        <p className="text-sm sm:text-base text-gray-500 dark:text-gray-400 mt-1">Find visa-sponsored jobs across the UK</p>
                     </div>
-                    <Link href="/" className="text-blue-600 dark:text-blue-400 hover:underline">
+                    <Link href="/" className="text-blue-600 dark:text-blue-400 hover:underline min-h-[44px] flex items-center">
                         &larr; Back to Dashboard
                     </Link>
                 </div>
             </header>
 
-            <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
                 {/* Search Form */}
-                <form onSubmit={handleFormSubmit} className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm mb-8 border border-gray-100 dark:border-gray-700 flex flex-col md:flex-row gap-4">
+                <form onSubmit={handleFormSubmit} className="bg-white dark:bg-gray-800 p-4 sm:p-6 rounded-xl shadow-sm mb-6 sm:mb-8 border border-gray-100 dark:border-gray-700 flex flex-col md:flex-row gap-4">
                     <div className="flex-1">
                         <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Keywords</label>
                         <input
                             type="text"
                             value={keywords}
                             onChange={(e) => setKeywords(e.target.value)}
-                            className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
+                            className="w-full px-4 py-3 min-h-[48px] border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
                             placeholder="e.g. software engineer visa sponsorship"
                         />
                     </div>
@@ -180,7 +180,7 @@ function SearchPageContent() {
                             type="text"
                             value={location}
                             onChange={(e) => setLocation(e.target.value)}
-                            className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
+                            className="w-full px-4 py-3 min-h-[48px] border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
                             placeholder="e.g. London or UK"
                         />
                     </div>
@@ -188,7 +188,7 @@ function SearchPageContent() {
                         <button
                             type="submit"
                             disabled={loading}
-                            className="w-full md:w-auto px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
+                            className="w-full md:w-auto px-6 py-3 min-h-[48px] bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
                         >
                             {loading ? (
                                 <>

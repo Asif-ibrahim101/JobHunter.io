@@ -37,26 +37,27 @@ export default function PDFPreview({ pdfUrl, loading, onDownload, onMaximize, on
     return (
         <div className="h-full flex flex-col">
             {/* Toolbar */}
-            <div className="flex items-center justify-between px-4 py-3 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
-                <h3 className="font-medium text-gray-900 dark:text-white">Resume Preview</h3>
-                <div className="flex items-center gap-2">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 px-3 sm:px-4 py-3 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
+                <h3 className="font-medium text-gray-900 dark:text-white text-center sm:text-left">Resume Preview</h3>
+                <div className="flex items-center justify-center sm:justify-end gap-2">
                     {onSave && (
                         <button
                             onClick={onSave}
                             disabled={saving}
-                            className="flex items-center gap-2 bg-green-600 hover:bg-green-700 disabled:opacity-50 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors"
+                            className="flex-1 sm:flex-none flex items-center justify-center gap-2 bg-green-600 hover:bg-green-700 disabled:opacity-50 text-white px-3 sm:px-4 py-2 min-h-[44px] rounded-lg text-sm font-medium transition-colors"
                         >
                             {saving ? (
                                 <>
                                     <div className="animate-spin rounded-full h-4 w-4 border-2 border-white/30 border-t-white"></div>
-                                    Saving...
+                                    <span className="hidden sm:inline">Saving...</span>
                                 </>
                             ) : (
                                 <>
                                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4" />
                                     </svg>
-                                    Save to Dashboard
+                                    <span className="hidden sm:inline">Save to Dashboard</span>
+                                    <span className="sm:hidden">Save</span>
                                 </>
                             )}
                         </button>
@@ -64,7 +65,7 @@ export default function PDFPreview({ pdfUrl, loading, onDownload, onMaximize, on
                     {onMaximize && (
                         <button
                             onClick={onMaximize}
-                            className="p-2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-white transition-colors"
+                            className="p-2 min-h-[44px] min-w-[44px] flex items-center justify-center text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-white transition-colors"
                             title="View Full Screen"
                         >
                             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -74,18 +75,19 @@ export default function PDFPreview({ pdfUrl, loading, onDownload, onMaximize, on
                     )}
                     <button
                         onClick={onDownload}
-                        className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors"
+                        className="flex-1 sm:flex-none flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-3 sm:px-4 py-2 min-h-[44px] rounded-lg text-sm font-medium transition-colors"
                     >
                         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
                         </svg>
-                        Download PDF
+                        <span className="hidden sm:inline">Download PDF</span>
+                        <span className="sm:hidden">Download</span>
                     </button>
                 </div>
             </div>
 
             {/* PDF Viewer */}
-            <div className="flex-1 overflow-hidden bg-gray-200 dark:bg-gray-900 p-4">
+            <div className="flex-1 overflow-hidden bg-gray-200 dark:bg-gray-900 p-2 sm:p-4">
                 <iframe
                     src={pdfUrl}
                     className="w-full h-full rounded-lg shadow-lg"
