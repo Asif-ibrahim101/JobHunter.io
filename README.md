@@ -1,62 +1,71 @@
-# JobHunter.io 🎯
+# 🎯 JobHunter.io
 
-A comprehensive job hunting automation suite featuring a Chrome extension, LinkedIn scraper, and AI-powered application assistant.
+**The ultimate AI-powered job search automation suite.**
 
-![Dashboard Screenshot](https://raw.githubusercontent.com/Asif-ibrahim101/JobHunter.io/main/screenshots/dashboard.png)
+JobHunter.io streamlines your job search by combining a powerful job tracker, LinkedIn scraper, and an advanced **AI Resume Generator** into one cohesive platform.
+
+![Dashboard Preview](https://raw.githubusercontent.com/Asif-ibrahim101/JobHunter.io/main/screenshots/dashboard.png)
 
 ## ✨ Features
 
-| Feature | Description |
-|---------|-------------|
-| 🔌 **Chrome Extension** | Extract job details from LinkedIn with one click |
-| 🕷️ **LinkedIn Scraper** | Automatically scrape job listings from LinkedIn |
-| 🌐 **Web Dashboard** | Beautiful Next.js dashboard to manage saved jobs |
-| 🤖 **AI Answers** | Generate personalized application answers with OpenAI |
-| ☁️ **Cloud Storage** | All data synced to Supabase (PostgreSQL) |
+### 📄 AI Resume Generator (New!)
+Create ATS-optimized resumes tailored to specific job descriptions in seconds.
+- **Tailored Content**: AI analyzes the Job Description and your profile to generate targeted resume content.
+- **ATS Scoring**: Real-time scoring (0-100) with "Missing Keywords" analysis to help you pass the bots.
+- **AI Bullet Points**: One-click generation of high-impact, role-specific bullet points for your experience.
+- **Resume History**: Track every resume you generate, view historical scores, and download past versions.
+- **Manual Save**: Save specific versions of your resume to your dashboard for later access.
+- **Professional PDF**: Export clean, LaTeX-formatted PDFs automatically named (`Name_Company.pdf`).
+
+### 🕵️ Job Automation
+- **Chrome Extension**: Save job details from LinkedIn with a single click.
+- **LinkedIn Scraper**: Automated scraping to populate your job board.
+- **Job Board**: A Kanban-style or list view dashboard to manage your application pipeline.
+- **AI Answers**: Generate personalized answers for common application questions (e.g., "Why this company?") using the **AI Answer** button.
+
+## 🛠️ Tech Stack
+
+- **Frontend**: Next.js 16 (App Router), TypeScript, Tailwind CSS, Lucide Icons.
+- **Backend**: Node.js, Express (Scraper), Next.js Server Actions (Resumes).
+- **Database**: Supabase (PostgreSQL) + Storage.
+- **AI**: OpenAI GPT-4o.
+- **PDF Generation**: LaTeX Compiler API.
 
 ## 🚀 Quick Start
 
-### Prerequisites
+### 1. Prerequisites
 - Node.js 18+
-- Supabase account (free tier works)
-- OpenAI API key
+- Supabase Account
+- OpenAI API Key
 
-### 1. Clone & Install
+### 2. Clone & Install
 
 ```bash
 git clone https://github.com/Asif-ibrahim101/JobHunter.io.git
 cd JobHunter.io
 
-# Install all dependencies
-cd backend && npm install && cd ..
-cd frontend && npm install && cd ..
-cd scraper && npm install && cd ..
+# Install Backend dependencies
+cd backend && npm install
+
+# Install Frontend dependencies
+cd ../frontend && npm install
 ```
 
-### 2. Configure Environment
+### 3. Environment Setup
 
-Create `.env.local` in the root directory:
-
-```env
-# Supabase
-SUPABASE_URL=https://your-project.supabase.co
-SUPABASE_ANON_KEY=your-anon-key
-
-# OpenAI
-OPENAI_API_KEY=sk-your-openai-key
-```
-
-Create `frontend/.env.local`:
+Create `.env.local` in `frontend/`:
 
 ```env
 NEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
 NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key
+OPENAI_API_KEY=sk-your-key
 ```
 
-### 3. Setup Supabase Database
+### 4. Database Setup (Supabase)
 
-Run this SQL in your Supabase SQL Editor:
+Run the following SQL queries in your Supabase SQL Editor:
 
+**Step 1: Create Jobs Table**
 ```sql
 CREATE TABLE jobs (
   id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
@@ -73,55 +82,41 @@ ALTER TABLE jobs ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "Allow all" ON jobs FOR ALL USING (true);
 ```
 
-### 4. Run the App
+**Step 2: Create Resume Tables**
+Run the content of the migration file located at:
+`backend/migrations/02_resume_dashboard.sql`
+
+*This creates the `generated_resumes` and `applications` tables required for the Resume Dashboard.*
+
+**(Important: Ensure you have a 'resumes' bucket in Supabase Storage)**
+
+### 5. Run the Application
 
 ```bash
-# Terminal 1: Backend API
-cd backend && npm run dev
-
-# Terminal 2: Frontend Dashboard
-cd frontend && npm run dev
-
-# Terminal 3 (optional): Run scraper
-cd scraper && npm run scrape
+# Terminal 1: Frontend (Dashboard & Generator)
+cd frontend
+npm run dev
+# App will run at http://localhost:3000
 ```
 
-- **Backend:** http://localhost:3001
-- **Frontend:** http://localhost:3000
-
-### 5. Install Chrome Extension
-
-1. Open `chrome://extensions/`
-2. Enable "Developer mode"
-3. Click "Load unpacked"
-4. Select the `/extension` folder
+```bash
+# Terminal 2: Backend (Scraper Service - Optional)
+cd backend
+npm run dev
+```
 
 ## 📁 Project Structure
 
 ```
 JobHunter.io/
-├── backend/          # Express.js API server
-├── extension/        # Chrome extension (Manifest V3)
-├── frontend/         # Next.js web dashboard
-└── scraper/          # Puppeteer LinkedIn scraper
+├── frontend/         # Next.js App (Dashboard, Resume Generator, Profile)
+│   ├── app/          # App Router Pages
+│   ├── components/   # UI Components (JobCard, ResumeEditor, etc.)
+│   └── lib/          # Utilities & Supabase Client
+├── backend/          # Express Server & Migrations
+│   └── migrations/   # SQL Migration Files
+└── extension/        # Chrome Extension Source
 ```
-
-## 🛠️ Tech Stack
-
-- **Frontend:** Next.js 16, TypeScript, Tailwind CSS
-- **Backend:** Node.js, Express
-- **Database:** Supabase (PostgreSQL)
-- **AI:** OpenAI GPT-4o-mini
-- **Scraping:** Puppeteer with stealth plugin
-- **Extension:** Chrome Manifest V3
-
-## 📸 Screenshots
-
-### Web Dashboard
-View and manage all your saved jobs in a beautiful card grid.
-
-### AI Answer Generation
-Click "AI Answer" on any job to generate personalized responses for common application questions.
 
 ## 📝 License
 
