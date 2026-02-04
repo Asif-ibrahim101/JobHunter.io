@@ -61,7 +61,7 @@ export default function LoginPage() {
                 {/* Logo */}
                 <div className="text-center mb-8">
                     <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-                        JobAutomate
+                        JobLee
                     </h1>
                     <p className="text-gray-500 dark:text-gray-400 mt-2">
                         Sign in to your account
@@ -176,6 +176,9 @@ export default function LoginPage() {
                     </button>
 
                     {/* Sign Up Link */}
+                    <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900 dark:text-white">
+                        Sign in to JobLee
+                    </h2>
                     <p className="mt-6 text-center text-gray-600 dark:text-gray-400">
                         Don&apos;t have an account?{' '}
                         <Link href="/signup" className="text-blue-600 dark:text-blue-400 hover:underline font-medium">

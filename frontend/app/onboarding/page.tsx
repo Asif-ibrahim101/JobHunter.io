@@ -76,7 +76,7 @@ export default function OnboardingPage() {
                 {/* Header */}
                 <div className="text-center mb-8">
                     <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-                        Welcome to JobAutomate! 🎉
+                        Welcome to JobLee! 🎉
                     </h1>
                     <p className="text-gray-500 dark:text-gray-400 mt-2">
                         Let&apos;s set up your profile to get started
@@ -88,8 +88,8 @@ export default function OnboardingPage() {
                     {steps.map((step, index) => (
                         <div key={step.id} className="flex items-center">
                             <div className={`flex items-center justify-center w-10 h-10 rounded-full font-semibold transition-all ${step.id <= currentStep
-                                    ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white'
-                                    : 'bg-gray-200 dark:bg-gray-700 text-gray-500'
+                                ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white'
+                                : 'bg-gray-200 dark:bg-gray-700 text-gray-500'
                                 }`}>
                                 {step.id < currentStep ? (
                                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -113,8 +113,9 @@ export default function OnboardingPage() {
                     {currentStep === 1 && (
                         <div className="space-y-6">
                             <div className="text-center mb-6">
-                                <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Personal Information</h2>
-                                <p className="text-gray-500 dark:text-gray-400 mt-1">Basic details about you</p>
+                                <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900 dark:text-white">
+                                    Welcome to JobLee
+                                </h2>                      <p className="text-gray-500 dark:text-gray-400 mt-1">Basic details about you</p>
                             </div>
 
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
