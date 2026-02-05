@@ -8,4 +8,7 @@ export interface Job {
     source: string;
     logo?: string;
     created_at: string;
+    salary?: string;
+    job_type?: string;
+    applied?: boolean;
 }

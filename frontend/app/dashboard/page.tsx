@@ -81,19 +81,6 @@ export default function Dashboard() {
             <div className="max-w-7xl mx-auto">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 sm:mb-8">
                     <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white">Dashboard</h1>
-                    <Link
-                        href="/"
-                        className="w-full sm:w-auto text-center bg-blue-600 hover:bg-blue-700 text-white px-4 py-3 min-h-[48px] rounded-lg text-sm font-medium transition-colors flex items-center justify-center"
-                    >
-                        Find New Jobs
-                    </Link>
-                </div>
-
-                {/* Resumes Section */}
-                <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
-                    <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
-                        <h2 className="text-xl font-semibold text-gray-900 dark:text-white">Generated Resumes</h2>
-                    </div>
 
                     {loading ? (
                         <div className="p-8 text-center">
@@ -127,11 +114,10 @@ export default function Dashboard() {
                                                     </p>
                                                 </div>
                                                 {resume.ats_score && (
-                                                    <span className={`ml-2 shrink-0 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                                                        resume.ats_score >= 80 ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300' :
+                                                    <span className={`ml-2 shrink-0 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${resume.ats_score >= 80 ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300' :
                                                         resume.ats_score >= 60 ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300' :
-                                                        'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300'
-                                                    }`}>
+                                                            'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300'
+                                                        }`}>
                                                         {resume.ats_score}/100
                                                     </span>
                                                 )}

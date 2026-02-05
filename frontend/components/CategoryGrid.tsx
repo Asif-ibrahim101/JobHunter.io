@@ -1,57 +1,92 @@
 'use client';
 
 const categories = [
-    { name: 'IT/Computer', count: '48 Jobs', icon: '💻', color: 'bg-blue-100 text-blue-600' },
-    { name: 'Financial Associate', count: '36 Jobs', icon: '💰', color: 'bg-orange-100 text-orange-600' },
-    { name: 'Advertising / Media', count: '52 Jobs', icon: '📢', color: 'bg-pink-100 text-pink-600' },
-    { name: 'Nurse Educator', count: '20 Jobs', icon: '⚕️', color: 'bg-green-100 text-green-600' },
-    { name: 'Office Executive', count: '16 Jobs', icon: '🏢', color: 'bg-purple-100 text-purple-600' },
-    { name: 'Engineer / Architect', count: '28 Jobs', icon: '🏗️', color: 'bg-red-100 text-red-600' },
-    { name: 'Garments', count: '85 Jobs', icon: '👕', color: 'bg-indigo-100 text-indigo-600' },
-    { name: 'Receptionist', count: '24 Jobs', icon: '📞', color: 'bg-yellow-100 text-yellow-600' },
+    {
+        name: 'IT / Computer',
+        count: 482,
+        icon: '💻',
+        trend: 'Hot',
+        trendIcon: '↑',
+        trendColor: 'text-orange-500',
+        employers: ['Google', 'Meta', 'Netflix', '+47 more'],
+    },
+    {
+        name: 'Finance',
+        count: 156,
+        icon: '💰',
+        trend: 'Growing',
+        trendIcon: '→',
+        trendColor: 'text-green-500',
+        employers: ['Stripe', 'Robinhood', 'Wise', '+23 more'],
+    },
+    {
+        name: 'Marketing',
+        count: 203,
+        icon: '📢',
+        trend: 'Hot',
+        trendIcon: '↑',
+        trendColor: 'text-orange-500',
+        employers: ['HubSpot', 'Airbnb', 'Notion', '+31 more'],
+    },
+    {
+        name: 'Healthcare',
+        count: 324,
+        icon: '🏥',
+        trend: 'Growing',
+        trendIcon: '→',
+        trendColor: 'text-green-500',
+        employers: ['Kaiser', 'UnitedHealth', 'Mayo', '+52 more'],
+    },
 ];
 
 export default function CategoryGrid() {
     return (
-        <section className="py-20 bg-white dark:bg-gray-900">
+        <section id="categories" className="py-20 bg-white dark:bg-gray-900">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-                <p className="text-red-500 font-medium mb-3 text-sm tracking-wider uppercase">Popular Job Categories</p>
+                <p className="text-xs font-semibold tracking-[0.2em] text-gray-500 uppercase mb-3">
+                    Browse by category
+                </p>
                 <h2 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4">
-                    Let's help you <span className="relative">
-                        choose
-                        <svg className="absolute w-full h-3 -bottom-1 left-0 text-yellow-300 -z-10" viewBox="0 0 100 10" preserveAspectRatio="none">
-                            <path d="M0 5 Q 50 10 100 5" stroke="currentColor" strokeWidth="8" fill="none" />
-                        </svg>
-                    </span> the <br /> category you want
+                    Find your path — from tech to healthcare
                 </h2>
                 <p className="text-gray-500 dark:text-gray-400 max-w-2xl mx-auto mb-16">
-                    Fully layered dolor sit amet, nobis id expedita dolores officiis layered dolor sit amet laboriosam.
+                    Explore roles by discipline and see which companies are hiring right now.
                 </p>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-                    {categories.map((cat, index) => (
+                    {categories.map((cat) => (
                         <a
                             href={`/jobs/search?keywords=${encodeURIComponent(cat.name)}`}
-                            key={index}
-                            className="group p-6 rounded-2xl border border-gray-100 dark:border-gray-800 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex items-center gap-4 text-left bg-white dark:bg-gray-800"
+                            key={cat.name}
+                            className="group p-6 rounded-lg border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-800 hover:shadow-xl hover:-translate-y-1 transition-all duration-200 text-left min-h-[320px] flex flex-col"
                         >
-                            <div className={`w-14 h-14 rounded-xl flex items-center justify-center text-2xl ${cat.color} group-hover:scale-110 transition-transform`}>
-                                {cat.icon}
+                            <div className="flex items-center justify-between">
+                                <div className="w-12 h-12 rounded-lg bg-gray-100 dark:bg-gray-700 flex items-center justify-center text-2xl">
+                                    {cat.icon}
+                                </div>
+                                <span className={`text-xs font-semibold ${cat.trendColor}`}>
+                                    {cat.trendIcon} {cat.trend}
+                                </span>
                             </div>
-                            <div>
-                                <h3 className="font-bold text-gray-900 dark:text-white text-lg">{cat.name}</h3>
-                                <p className="text-gray-500 dark:text-gray-400 text-sm">{cat.count}</p>
+                            <h3 className="mt-5 text-xl font-semibold text-gray-900 dark:text-white">{cat.name}</h3>
+                            <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">{cat.count} jobs</p>
+
+                            <div className="mt-5 space-y-1 text-sm text-gray-500 dark:text-gray-400">
+                                {cat.employers.map((employer) => (
+                                    <div key={employer}>{employer}</div>
+                                ))}
+                            </div>
+
+                            <div className="mt-auto pt-6 text-sm font-semibold text-indigo-600 group-hover:text-indigo-700">
+                                Explore →
                             </div>
                         </a>
                     ))}
                 </div>
 
                 <div className="mt-12">
-                    <a href="/jobs/search" className="inline-flex items-center text-red-500 font-semibold hover:text-red-600 transition-colors group">
-                        See All Categories
-                        <svg className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
-                        </svg>
+                    <a href="/jobs/search" className="inline-flex items-center text-indigo-600 font-semibold hover:text-indigo-700 transition-colors">
+                        Explore All 24 Categories →
                     </a>
                 </div>
             </div>
