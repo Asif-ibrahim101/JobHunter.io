@@ -281,11 +281,10 @@ export default function ResumeGenerator({ job }: ResumeGeneratorProps) {
             <div className="md:hidden flex border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800">
                 <button
                     onClick={() => setMobileView('preview')}
-                    className={`flex-1 py-3 px-4 text-center font-medium min-h-[48px] transition-colors ${
-                        mobileView === 'preview'
+                    className={`flex-1 py-3 px-4 text-center font-medium min-h-[48px] transition-colors ${mobileView === 'preview'
                             ? 'text-purple-600 dark:text-purple-400 border-b-2 border-purple-600 dark:border-purple-400 bg-purple-50 dark:bg-purple-900/20'
                             : 'text-gray-600 dark:text-gray-400'
-                    }`}
+                        }`}
                 >
                     <span className="flex items-center justify-center gap-2">
                         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -296,11 +295,10 @@ export default function ResumeGenerator({ job }: ResumeGeneratorProps) {
                 </button>
                 <button
                     onClick={() => setMobileView('editor')}
-                    className={`flex-1 py-3 px-4 text-center font-medium min-h-[48px] transition-colors ${
-                        mobileView === 'editor'
+                    className={`flex-1 py-3 px-4 text-center font-medium min-h-[48px] transition-colors ${mobileView === 'editor'
                             ? 'text-purple-600 dark:text-purple-400 border-b-2 border-purple-600 dark:border-purple-400 bg-purple-50 dark:bg-purple-900/20'
                             : 'text-gray-600 dark:text-gray-400'
-                    }`}
+                        }`}
                 >
                     <span className="flex items-center justify-center gap-2">
                         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -312,9 +310,8 @@ export default function ResumeGenerator({ job }: ResumeGeneratorProps) {
             </div>
 
             {/* PDF Preview - Left Side on desktop, conditional on mobile */}
-            <div className={`md:w-1/2 md:border-r border-gray-200 dark:border-gray-700 bg-gray-100 dark:bg-gray-900 overflow-hidden ${
-                mobileView === 'preview' ? 'flex-1' : 'hidden'
-            } md:block`}>
+            <div className={`md:w-1/2 md:border-r border-gray-200 dark:border-gray-700 bg-gray-100 dark:bg-gray-900 overflow-hidden ${mobileView === 'preview' ? 'flex-1' : 'hidden'
+                } md:block`}>
                 <PDFPreview
                     pdfUrl={pdfUrl}
                     loading={compiling}
@@ -326,15 +323,17 @@ export default function ResumeGenerator({ job }: ResumeGeneratorProps) {
             </div>
 
             {/* Editor - Right Side on desktop, conditional on mobile */}
-            <div className={`md:w-1/2 overflow-y-auto bg-white dark:bg-gray-800 ${
-                mobileView === 'editor' ? 'flex-1' : 'hidden'
-            } md:block`}>
+            <div className={`md:w-1/2 overflow-y-auto bg-white dark:bg-gray-800 ${mobileView === 'editor' ? 'flex-1' : 'hidden'
+                } md:block`}>
                 <ResumeEditor
                     content={resumeContent!}
                     onUpdate={handleContentUpdate}
                     onRegenerate={handleGenerate}
                     generating={generating}
                     jobDescription={job.description}
+                    userId={user?.id || ''}
+                    jobTitle={job.title}
+                    companyName={job.company}
                 />
             </div>
 

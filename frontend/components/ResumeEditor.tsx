@@ -3,21 +3,130 @@
 import { useState } from 'react';
 import { ResumeContent, ExperienceItem, ProjectItem } from '@/lib/resume-template';
 
+import { ResumeAnalysisResult } from '@/types/analysis';
+import AnalysisResults from './AnalysisResults';
+import { Loader2, Sparkles, X } from 'lucide-react';
+
 interface ResumeEditorProps {
     content: ResumeContent;
     onUpdate: (content: ResumeContent) => void;
     onRegenerate: () => void;
     generating: boolean;
     jobDescription?: string;
+    userId: string;
+    jobTitle?: string;
+    companyName?: string;
 }
 
-export default function ResumeEditor({ content, onUpdate, onRegenerate, generating, jobDescription }: ResumeEditorProps) {
+export default function ResumeEditor({
+    content,
+    onUpdate,
+    onRegenerate,
+    generating,
+    jobDescription,
+    userId,
+    jobTitle,
+    companyName
+}: ResumeEditorProps) {
     const [activeTab, setActiveTab] = useState<'skills' | 'experience' | 'projects' | 'achievements'>('skills');
     const [showAddExperience, setShowAddExperience] = useState(false);
     const [showAddProject, setShowAddProject] = useState(false);
 
+    // Analysis State
+    const [isAnalyzing, setIsAnalyzing] = useState(false);
+    const [analysisResult, setAnalysisResult] = useState<ResumeAnalysisResult | null>(null);
+    const [showAnalysis, setShowAnalysis] = useState(false);
+
     // Track which item is currently generating points
     const [generatingPoints, setGeneratingPoints] = useState<{ type: 'experience' | 'project', index: number } | null>(null);
+
+    const serializeResumeContent = (content: ResumeContent): string => {
+        return `
+Name: ${content.name}
+Email: ${content.email}
+Phone: ${content.phone}
+LinkedIn: ${content.linkedin}
+GitHub: ${content.github}
+
+Skills:
+${content.skills.join(', ')}
+
+Experience:
+${content.experience.map(exp => `
+Title: ${exp.title}
+Company: ${exp.company}
+Location: ${exp.location}
+Dates: ${exp.startDate} - ${exp.endDate}
+Bullets:
+${exp.bullets.map(b => `- ${b}`).join('\n')}
+`).join('\n')}
+
+Projects:
+${content.projects.map(proj => `
+Name: ${proj.name}
+Technologies: ${proj.technologies.join(', ')}
+Bullets:
+${proj.bullets.map(b => `- ${b}`).join('\n')}
+`).join('\n')}
+
+Achievements:
+${(content.achievements || []).map(a => `- ${a}`).join('\n')}
+        `.trim();
+    };
+
+    const handleAnalyze = async () => {
+        if (!jobDescription) return;
+
+        setIsAnalyzing(true);
+        try {
+            const resumeText = serializeResumeContent(content);
+
+            const response = await fetch('/api/resume/analyze', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    userId,
+                    resumeText,
+                    jobDescription,
+                    jobTitle,
+                    companyName,
+                }),
+            });
+
+            const data = await response.json();
+            if (data.success) {
+                setAnalysisResult(data.analysis);
+                setShowAnalysis(true);
+            }
+        } catch (error) {
+            console.error('Analysis error:', error);
+            // Optionally set an error state here
+        } finally {
+            setIsAnalyzing(false);
+        }
+    };
+
+    const handleAddKeyword = (keyword: string) => {
+        // Add to skills if not present
+        if (!content.skills.includes(keyword)) {
+            const newSkills = [...content.skills, keyword];
+
+            // Optimistically update analysis results
+            let newAnalysis = analysisResult;
+            if (analysisResult) {
+                newAnalysis = {
+                    ...analysisResult,
+                    missing_keywords: analysisResult.missing_keywords.filter(k => k !== keyword)
+                };
+                setAnalysisResult(newAnalysis);
+            }
+
+            onUpdate({
+                ...content,
+                skills: newSkills
+            });
+        }
+    };
 
     // AI Point Generation Handler
     const handleGeneratePoints = async (type: 'experience' | 'project', index: number) => {
@@ -161,109 +270,53 @@ export default function ResumeEditor({ content, onUpdate, onRegenerate, generati
             <div className="px-4 sm:px-6 py-4 border-b border-gray-200 dark:border-gray-700">
                 <div className="flex items-center justify-between mb-4">
                     <h3 className="font-semibold text-gray-900 dark:text-white">Resume Editor</h3>
-                    <button
-                        onClick={onRegenerate}
-                        disabled={generating}
-                        className="flex items-center gap-2 text-sm text-purple-600 dark:text-purple-400 hover:text-purple-700 dark:hover:text-purple-300 disabled:opacity-50 transition-colors min-h-[44px] px-3"
-                    >
-                        <svg className={`w-4 h-4 ${generating ? 'animate-spin' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                        </svg>
-                        <span className="hidden sm:inline">Regenerate</span>
-                    </button>
+                    {/* Action Buttons */}
+                    <div className="flex gap-2">
+                        <button
+                            onClick={handleAnalyze}
+                            disabled={isAnalyzing || !jobDescription}
+                            className="flex items-center gap-2 text-sm bg-blue-50 text-blue-600 dark:bg-blue-900/20 dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-blue-900/40 transition-colors min-h-[44px] px-4 rounded-lg font-medium"
+                        >
+                            {isAnalyzing ? (
+                                <Loader2 className="w-4 h-4 animate-spin" />
+                            ) : (
+                                <Sparkles className="w-4 h-4" />
+                            )}
+                            <span className="hidden sm:inline">{isAnalyzing ? 'Analyzing...' : 'Analyze with AI'}</span>
+                        </button>
+                        <button
+                            onClick={onRegenerate}
+                            disabled={generating}
+                            className="flex items-center gap-2 text-sm text-purple-600 dark:text-purple-400 hover:bg-purple-50 dark:hover:bg-purple-900/20 transition-colors min-h-[44px] px-4 rounded-lg font-medium"
+                        >
+                            <svg className={`w-4 h-4 ${generating ? 'animate-spin' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                            </svg>
+                            <span className="hidden sm:inline">Regenerate</span>
+                        </button>
+                    </div>
                 </div>
 
-                {/* ATS Score Card */}
-                {typeof content.atsScore === 'number' && (
-                    <div className="bg-gradient-to-r from-gray-50 to-gray-100 dark:from-gray-800 dark:to-gray-700 rounded-xl p-4 mb-4 border border-gray-200 dark:border-gray-600">
-                        <div className="flex items-center justify-between mb-3">
-                            <div>
-                                <h4 className="font-bold text-gray-900 dark:text-white">ATS Match Score</h4>
-                                <p className="text-xs text-gray-500 dark:text-gray-400">Based on JD keywords</p>
+                {/* Analysis Result Modal/Overlay */}
+                {showAnalysis && analysisResult && (
+                    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
+                        <div className="bg-white dark:bg-gray-900 w-full max-w-4xl max-h-[90vh] rounded-2xl shadow-2xl flex flex-col overflow-hidden">
+                            <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+                                <h3 className="text-lg font-semibold text-gray-900 dark:text-white">AI Analysis Results</h3>
+                                <button
+                                    onClick={() => setShowAnalysis(false)}
+                                    className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors"
+                                >
+                                    <X className="w-5 h-5 text-gray-500" />
+                                </button>
                             </div>
-                            <div className={`text-2xl font-bold ${content.atsScore >= 80 ? 'text-green-600 dark:text-green-400' :
-                                    content.atsScore >= 60 ? 'text-yellow-600 dark:text-yellow-400' :
-                                        'text-red-600 dark:text-red-400'
-                                }`}>
-                                {content.atsScore}/100
+                            <div className="flex-1 overflow-y-auto p-6 bg-gray-50 dark:bg-gray-900/50">
+                                <AnalysisResults
+                                    analysis={analysisResult}
+                                    onAddKeyword={handleAddKeyword}
+                                />
                             </div>
                         </div>
-
-                        {/* Progress Bar */}
-                        <div className="w-full bg-gray-200 dark:bg-gray-600 rounded-full h-2.5 mb-4">
-                            <div
-                                className={`h-2.5 rounded-full ${content.atsScore >= 80 ? 'bg-green-500' :
-                                        content.atsScore >= 60 ? 'bg-yellow-500' :
-                                            'bg-red-500'
-                                    }`}
-                                style={{ width: `${content.atsScore}%` }}
-                            ></div>
-                        </div>
-
-                        {/* Keywords Analysis */}
-                        {content.analysis && (
-                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
-                                <div>
-                                    <p className="font-medium text-green-700 dark:text-green-400 mb-1 flex items-center gap-1">
-                                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                                        </svg>
-                                        Matched Keywords
-                                    </p>
-                                    <div className="flex flex-wrap gap-1">
-                                        {content.analysis.matchedKeywords.slice(0, 5).map((kw, i) => (
-                                            <span key={i} className="px-2 py-0.5 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 rounded text-xs border border-green-200 dark:border-green-800">
-                                                {kw}
-                                            </span>
-                                        ))}
-                                        {content.analysis.matchedKeywords.length > 5 && (
-                                            <span className="text-xs text-gray-500">+{content.analysis.matchedKeywords.length - 5} more</span>
-                                        )}
-                                    </div>
-                                </div>
-                                <div>
-                                    <p className="font-medium text-red-700 dark:text-red-400 mb-1 flex items-center gap-1">
-                                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                                        </svg>
-                                        Missing Keywords
-                                    </p>
-                                    <div className="flex flex-wrap gap-1">
-                                        {content.analysis.missingKeywords.slice(0, 5).map((kw, i) => (
-                                            <button
-                                                key={i}
-                                                onClick={() => {
-                                                    const newSkills = [...content.skills, kw];
-                                                    const newMatched = [...(content.analysis?.matchedKeywords || []), kw];
-                                                    const newMissing = content.analysis?.missingKeywords.filter(k => k !== kw) || [];
-
-                                                    // Dynamic score update: +2 points per keyword added, max 100
-                                                    const currentScore = content.atsScore || 0;
-                                                    const newScore = Math.min(100, currentScore + 2);
-
-                                                    onUpdate({
-                                                        ...content,
-                                                        skills: newSkills,
-                                                        atsScore: newScore,
-                                                        analysis: {
-                                                            matchedKeywords: newMatched,
-                                                            missingKeywords: newMissing
-                                                        }
-                                                    });
-                                                }}
-                                                className="px-2 py-0.5 bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300 rounded text-xs border border-red-200 dark:border-red-800 hover:bg-red-200 dark:hover:bg-red-900/50 cursor-pointer transition-colors flex items-center gap-1 group"
-                                                title="Click to add to skills (+2 ATS Score)"
-                                            >
-                                                {kw}
-                                                <svg className="w-3 h-3 opacity-0 group-hover:opacity-100 transition-opacity" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-                                                </svg>
-                                            </button>
-                                        ))}
-                                    </div>
-                                </div>
-                            </div>
-                        )}
                     </div>
                 )}
 
