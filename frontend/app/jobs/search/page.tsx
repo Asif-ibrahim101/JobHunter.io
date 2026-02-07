@@ -13,8 +13,11 @@ function SearchPageContent() {
     const [jobs, setJobs] = useState<Job[]>([]);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
-    const [keywords, setKeywords] = useState('visa sponsorship');
-    const [location, setLocation] = useState('UK');
+    const [keywords, setKeywords] = useState(''); // Default empty to show more results initially if specific keywords aren't provided
+    const [location, setLocation] = useState('Germany'); // Arbeitnow has many German jobs, good default or keep 'UK'? Let's default to empty or generic. The user had 'UK'.
+    // Actually, let's keep user defaults but maybe set visaSponsored to true by default if that's the main goal?
+    // Plan said default false or true. Let's make it false but easy to toggle, or match the user request "filter to find all".
+    const [visaSponsored, setVisaSponsored] = useState(false);
     const [savedJobIds, setSavedJobIds] = useState<Set<string>>(new Set());
 
     useEffect(() => {
@@ -44,9 +47,10 @@ function SearchPageContent() {
         try {
             const queryParams = new URLSearchParams({
                 keywords,
-                location
+                location,
+                visa_sponsorship: visaSponsored.toString()
             });
-            const res = await fetch(`http://localhost:3001/api/jobs/search?${queryParams}`);
+            const res = await fetch(`/api/jobs/search?${queryParams}`);
 
             if (!res.ok) {
                 const errData = await res.json().catch(() => ({}));
@@ -183,6 +187,17 @@ function SearchPageContent() {
                             className="w-full px-4 py-3 min-h-[48px] border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
                             placeholder="e.g. London or UK"
                         />
+                    </div>
+                    <div className="flex items-center">
+                        <label className="flex items-center space-x-2 cursor-pointer">
+                            <input
+                                type="checkbox"
+                                checked={visaSponsored}
+                                onChange={(e) => setVisaSponsored(e.target.checked)}
+                                className="w-5 h-5 text-blue-600 rounded border-gray-300 focus:ring-blue-500"
+                            />
+                            <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Visa Sponsorship</span>
+                        </label>
                     </div>
                     <div className="flex items-end">
                         <button

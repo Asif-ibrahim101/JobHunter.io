@@ -14,6 +14,58 @@ const CONFIG = {
 };
 
 /**
+ * Parse relative date strings like "2 days ago", "1 week ago", "New" into ISO timestamps
+ */
+function parseRelativeDate(dateString) {
+    if (!dateString) return new Date().toISOString();
+
+    const now = new Date();
+    const lowerStr = dateString.toLowerCase().trim();
+
+    // Handle "New", "Just now", "Today"
+    if (lowerStr === 'new' || lowerStr === 'just now' || lowerStr === 'today') {
+        return now.toISOString();
+    }
+
+    // Handle "Yesterday"
+    if (lowerStr === 'yesterday') {
+        now.setDate(now.getDate() - 1);
+        return now.toISOString();
+    }
+
+    // Handle "X days ago", "X day ago"
+    const daysMatch = lowerStr.match(/(\d+)\s*days?\s*ago/);
+    if (daysMatch) {
+        now.setDate(now.getDate() - parseInt(daysMatch[1], 10));
+        return now.toISOString();
+    }
+
+    // Handle "X weeks ago", "X week ago"
+    const weeksMatch = lowerStr.match(/(\d+)\s*weeks?\s*ago/);
+    if (weeksMatch) {
+        now.setDate(now.getDate() - parseInt(weeksMatch[1], 10) * 7);
+        return now.toISOString();
+    }
+
+    // Handle "X months ago", "X month ago"
+    const monthsMatch = lowerStr.match(/(\d+)\s*months?\s*ago/);
+    if (monthsMatch) {
+        now.setMonth(now.getMonth() - parseInt(monthsMatch[1], 10));
+        return now.toISOString();
+    }
+
+    // Handle "X hours ago", "X hour ago"
+    const hoursMatch = lowerStr.match(/(\d+)\s*hours?\s*ago/);
+    if (hoursMatch) {
+        now.setHours(now.getHours() - parseInt(hoursMatch[1], 10));
+        return now.toISOString();
+    }
+
+    // Default to now if we can't parse
+    return now.toISOString();
+}
+
+/**
  * Scrape LinkedIn job listings (public, no login required)
  */
 async function scrapeLinkedInJobs(options = {}) {
@@ -79,6 +131,8 @@ async function scrapeLinkedInJobs(options = {}) {
                     const locationEl = card.querySelector('.job-search-card__location, .job-card-container__metadata-item');
                     const linkEl = card.querySelector('a.base-card__full-link, a');
                     const logoEl = card.querySelector('img.artdeco-entity-image, .job-search-card__logo-image, img.job-card-list__entity-image');
+                    // Date selectors - LinkedIn shows "2 days ago", "1 week ago", etc.
+                    const dateEl = card.querySelector('.job-search-card__listdate, time, .job-search-card__listdate--new, [datetime]');
 
                     return {
                         title: titleEl?.textContent?.trim() || '',
@@ -86,11 +140,14 @@ async function scrapeLinkedInJobs(options = {}) {
                         location: locationEl?.textContent?.trim() || '',
                         url: linkEl?.href || '',
                         logo: logoEl?.getAttribute('src') || logoEl?.getAttribute('data-delayed-url') || '',
+                        postedDateRaw: dateEl?.textContent?.trim() || dateEl?.getAttribute('datetime') || '',
                     };
                 }, i);
 
                 if (jobData && jobData.title && jobData.url) {
                     jobData.source = 'LinkedIn Scraper';
+                    jobData.created_at = parseRelativeDate(jobData.postedDateRaw);
+                    delete jobData.postedDateRaw; // Clean up temp field
                     jobs.push(jobData);
                 }
             } catch (err) {

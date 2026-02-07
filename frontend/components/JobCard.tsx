@@ -50,8 +50,9 @@ export default function JobCard({ job, onDelete, isSaved, onToggleSave, layout =
         return now.getTime() - posted.getTime() < 24 * 60 * 60 * 1000;
     }, [job.created_at]);
 
-    const getCompanyInitials = (company: string) => {
-        return company
+    const getCompanyInitials = (company: string | null | undefined) => {
+        const name = company || 'Unknown';
+        return name
             .split(' ')
             .map((w) => w[0])
             .join('')
@@ -59,22 +60,24 @@ export default function JobCard({ job, onDelete, isSaved, onToggleSave, layout =
             .toUpperCase();
     };
 
-    const getCompanyColor = (company: string) => {
+    const getCompanyColor = (company: string | null | undefined) => {
+        const name = company || 'Unknown';
         let hash = 0;
-        for (let i = 0; i < company.length; i += 1) {
-            hash = company.charCodeAt(i) + ((hash << 5) - hash);
+        for (let i = 0; i < name.length; i += 1) {
+            hash = name.charCodeAt(i) + ((hash << 5) - hash);
         }
         const hue = Math.abs(hash) % 360;
         return `hsl(${hue} 70% 45%)`;
     };
 
     const logoUrl = normalizeLogoUrl(job.logo, job.source);
-    const accentColor = getCompanyColor(job.company);
+    const companyName = job.company || 'Unknown';
+    const accentColor = getCompanyColor(companyName);
 
     const locationLabel = job.location || 'Remote';
     const contentText = `${job.title} ${job.description || ''}`.toLowerCase();
     const isRemote = /remote/i.test(locationLabel) || contentText.includes('remote');
-    const isVisaSponsored = contentText.includes('visa') || contentText.includes('sponsorship');
+    const isVisaSponsored = job.visa_sponsorship || contentText.includes('visa') || contentText.includes('sponsorship');
     const isEntryLevel = /(entry level|junior|graduate|intern)/i.test(contentText);
 
     const jobTypeLabel = job.job_type
@@ -86,7 +89,7 @@ export default function JobCard({ job, onDelete, isSaved, onToggleSave, layout =
 
     const tags = [
         isRemote ? 'Remote' : '',
-        isVisaSponsored ? 'Visa Sponsor' : '',
+        // isVisaSponsored ? 'Visa Sponsor' : '', // Removed from generic tags to give it a special badge
         isEntryLevel ? 'Entry Level' : '',
     ].filter(Boolean);
 
@@ -112,7 +115,7 @@ export default function JobCard({ job, onDelete, isSaved, onToggleSave, layout =
                         {logoUrl && !imageError ? (
                             <img
                                 src={logoUrl}
-                                alt={`${job.company} logo`}
+                                alt={`${companyName} logo`}
                                 className="w-10 h-10 rounded-lg object-contain bg-white border border-gray-100 dark:border-gray-700 shadow-sm p-1"
                                 onError={() => setImageError(true)}
                             />
@@ -121,7 +124,7 @@ export default function JobCard({ job, onDelete, isSaved, onToggleSave, layout =
                                 className="w-10 h-10 rounded-lg flex items-center justify-center text-white font-semibold text-xs shadow-sm"
                                 style={{ backgroundColor: accentColor }}
                             >
-                                {getCompanyInitials(job.company)}
+                                {getCompanyInitials(companyName)}
                             </div>
                         )}
 
@@ -133,12 +136,20 @@ export default function JobCard({ job, onDelete, isSaved, onToggleSave, layout =
                                 {job.title}
                             </Link>
                             <p className="text-[14px] font-medium text-indigo-600 dark:text-indigo-400 mt-0.5 truncate">
-                                {job.company}
+                                {companyName}
                             </p>
                         </div>
                     </div>
 
                     <div className="flex flex-wrap items-center gap-4 text-[13px] text-gray-500 dark:text-gray-400">
+                        {isVisaSponsored && (
+                            <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[12px] font-semibold bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300 border border-purple-200 dark:border-purple-800">
+                                <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                                Visa Sponsorship
+                            </span>
+                        )}
                         <span className="flex items-center gap-1.5">
                             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />

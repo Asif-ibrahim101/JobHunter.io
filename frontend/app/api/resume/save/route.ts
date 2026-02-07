@@ -33,6 +33,19 @@ export async function POST(request: NextRequest) {
             return NextResponse.json({ error: error.message }, { status: 500 });
         }
 
+        const { error: appError } = await supabase
+            .from('applications')
+            .upsert({
+                user_id: userId,
+                job_id: jobId,
+                resume_id: data.id,
+                status: 'applied'
+            }, { onConflict: 'user_id, job_id' });
+
+        if (appError) {
+            console.error('Error creating application:', appError);
+        }
+
         return NextResponse.json({ success: true, resume: data });
 
     } catch (error) {

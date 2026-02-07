@@ -1,5 +1,64 @@
 console.log("JobAutomate: Content script loaded.");
 
+/**
+ * Parse relative date strings like "2 days ago", "1 week ago", "New" into ISO timestamps
+ */
+function parseRelativeDate(dateString) {
+  if (!dateString) return new Date().toISOString();
+
+  const now = new Date();
+  const lowerStr = dateString.toLowerCase().trim();
+
+  // Handle "New", "Just now", "Today"
+  if (lowerStr === 'new' || lowerStr === 'just now' || lowerStr === 'today' || lowerStr === 'just posted') {
+    return now.toISOString();
+  }
+
+  // Handle "Yesterday"
+  if (lowerStr === 'yesterday') {
+    now.setDate(now.getDate() - 1);
+    return now.toISOString();
+  }
+
+  // Handle "X days ago", "X day ago"
+  const daysMatch = lowerStr.match(/(\d+)\s*days?\s*ago/);
+  if (daysMatch) {
+    now.setDate(now.getDate() - parseInt(daysMatch[1], 10));
+    return now.toISOString();
+  }
+
+  // Handle "X weeks ago", "X week ago"
+  const weeksMatch = lowerStr.match(/(\d+)\s*weeks?\s*ago/);
+  if (weeksMatch) {
+    now.setDate(now.getDate() - parseInt(weeksMatch[1], 10) * 7);
+    return now.toISOString();
+  }
+
+  // Handle "X months ago", "X month ago"
+  const monthsMatch = lowerStr.match(/(\d+)\s*months?\s*ago/);
+  if (monthsMatch) {
+    now.setMonth(now.getMonth() - parseInt(monthsMatch[1], 10));
+    return now.toISOString();
+  }
+
+  // Handle "X hours ago", "X hour ago"
+  const hoursMatch = lowerStr.match(/(\d+)\s*hours?\s*ago/);
+  if (hoursMatch) {
+    now.setHours(now.getHours() - parseInt(hoursMatch[1], 10));
+    return now.toISOString();
+  }
+
+  // Handle "X minutes ago"
+  const minutesMatch = lowerStr.match(/(\d+)\s*minutes?\s*ago/);
+  if (minutesMatch) {
+    now.setMinutes(now.getMinutes() - parseInt(minutesMatch[1], 10));
+    return now.toISOString();
+  }
+
+  // Default to now if we can't parse
+  return now.toISOString();
+}
+
 // Function to extract job data from LinkedIn
 function extractLinkedInJobData() {
   console.log("JobAutomate: Attempting to extract LinkedIn data...");
@@ -10,7 +69,8 @@ function extractLinkedInJobData() {
     location: "",
     description: "",
     source: "LinkedIn",
-    url: window.location.href
+    url: window.location.href,
+    created_at: new Date().toISOString()
   };
 
   // Helper to try multiple selectors and return first match
@@ -84,6 +144,16 @@ function extractLinkedInJobData() {
     '.description__text'
   ];
 
+  // Posted date selectors - LinkedIn shows "Posted X days ago", "Reposted X days ago", etc.
+  const postedDateSelectors = [
+    '.job-details-jobs-unified-top-card__primary-description-container .tvm__text--low-emphasis',
+    '.jobs-unified-top-card__posted-date',
+    '.posted-time-ago__text',
+    'span.jobs-unified-top-card__subtitle-secondary-grouping span',
+    '[class*="posted"]',
+    'time'
+  ];
+
   // Extract title
   jobData.title = getText(titleSelectors);
 
@@ -106,6 +176,27 @@ function extractLinkedInJobData() {
 
   // Extract description
   jobData.description = getText(descriptionSelectors);
+
+  // Extract posted date
+  let postedDateRaw = getText(postedDateSelectors);
+
+  // Try to find date in the primary description container if not found
+  if (!postedDateRaw) {
+    const primaryDesc = document.querySelector('.job-details-jobs-unified-top-card__primary-description-container');
+    if (primaryDesc) {
+      const allText = primaryDesc.innerText || '';
+      // Look for patterns like "Posted 2 days ago", "Reposted 1 week ago"
+      const match = allText.match(/(posted|reposted)?\s*(\d+\s*(days?|weeks?|months?|hours?)\s*ago|yesterday|today|just now)/i);
+      if (match) {
+        postedDateRaw = match[0];
+      }
+    }
+  }
+
+  if (postedDateRaw) {
+    jobData.created_at = parseRelativeDate(postedDateRaw);
+    console.log("JobAutomate: Parsed posted date:", postedDateRaw, "->", jobData.created_at);
+  }
 
   // Debug: Log all potential description containers
   console.log("JobAutomate: Searching for description elements...");

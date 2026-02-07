@@ -11,4 +11,5 @@ export interface Job {
     salary?: string;
     job_type?: string;
     applied?: boolean;
+    visa_sponsorship?: boolean;
 }

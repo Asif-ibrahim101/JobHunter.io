@@ -14,6 +14,65 @@ const CONFIG = {
 };
 
 /**
+ * Parse relative date strings like "2 days ago", "1 week ago", "New" into ISO timestamps
+ */
+function parseRelativeDate(dateString) {
+    if (!dateString) return new Date().toISOString();
+
+    const now = new Date();
+    const lowerStr = dateString.toLowerCase().trim();
+
+    // Handle "New", "Just now", "Today"
+    if (lowerStr === 'new' || lowerStr === 'just now' || lowerStr === 'today') {
+        return now.toISOString();
+    }
+
+    // Handle "Yesterday"
+    if (lowerStr === 'yesterday') {
+        now.setDate(now.getDate() - 1);
+        return now.toISOString();
+    }
+
+    // Handle "Xd" format (Glassdoor often uses this)
+    const shortDaysMatch = lowerStr.match(/^(\d+)d$/);
+    if (shortDaysMatch) {
+        now.setDate(now.getDate() - parseInt(shortDaysMatch[1], 10));
+        return now.toISOString();
+    }
+
+    // Handle "X days ago", "X day ago"
+    const daysMatch = lowerStr.match(/(\d+)\s*days?\s*ago/);
+    if (daysMatch) {
+        now.setDate(now.getDate() - parseInt(daysMatch[1], 10));
+        return now.toISOString();
+    }
+
+    // Handle "X weeks ago", "X week ago"
+    const weeksMatch = lowerStr.match(/(\d+)\s*weeks?\s*ago/);
+    if (weeksMatch) {
+        now.setDate(now.getDate() - parseInt(weeksMatch[1], 10) * 7);
+        return now.toISOString();
+    }
+
+    // Handle "X months ago", "X month ago"
+    const monthsMatch = lowerStr.match(/(\d+)\s*months?\s*ago/);
+    if (monthsMatch) {
+        now.setMonth(now.getMonth() - parseInt(monthsMatch[1], 10));
+        return now.toISOString();
+    }
+
+    // Handle "X hours ago", "X hour ago", "Xh"
+    const hoursMatch = lowerStr.match(/(\d+)\s*h(?:ours?)?\s*(?:ago)?/);
+    if (hoursMatch) {
+        now.setHours(now.getHours() - parseInt(hoursMatch[1], 10));
+        return now.toISOString();
+    }
+
+    // Default to now if we can't parse
+    return now.toISOString();
+}
+
+/**
  * Scrape Glassdoor job listings (public, no login required)
  */
 async function scrapeGlassdoorJobs(options = {}) {
@@ -101,6 +160,9 @@ async function scrapeGlassdoorJobs(options = {}) {
                     }
                 }
 
+                // Date selectors - Glassdoor shows "2d", "1w", "3 days ago", etc.
+                const dateEl = card.querySelector('[data-test="job-age"], .JobCard_listingAge__KuaxZ, .job-age, [class*="listingAge"]');
+
                 if (titleEl) {
                     results.push({
                         title: titleEl.textContent?.trim() || '',
@@ -108,6 +170,7 @@ async function scrapeGlassdoorJobs(options = {}) {
                         location: locationEl?.textContent?.trim() || '',
                         url: linkEl?.href || '',
                         logo,
+                        postedDateRaw: dateEl?.textContent?.trim() || '',
                     });
                 }
             });
@@ -117,10 +180,12 @@ async function scrapeGlassdoorJobs(options = {}) {
 
         console.log(`📋 [Glassdoor] Found ${jobData.length} job cards`);
 
-        // Add source and fetch descriptions
+        // Add source, parse dates, and fetch descriptions
         for (let i = 0; i < jobData.length; i++) {
             const job = jobData[i];
             job.source = 'Glassdoor';
+            job.created_at = parseRelativeDate(job.postedDateRaw);
+            delete job.postedDateRaw; // Clean up temp field
 
             if (job.url) {
                 try {
